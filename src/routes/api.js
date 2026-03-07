@@ -215,6 +215,21 @@ router.post('/app-settings/admin-users', requireAuth, async (req, res) => {
 });
 
 // ---- Routers CRUD ----
+router.get('/routers/status', requireAuth, async (req, res) => {
+  const list = db.getAllRouters();
+  const statuses = await Promise.all(
+    list.map(async (r) => {
+      try {
+        await provisioning.testConnection(r);
+        return { id: r.id, name: r.name, status: 'ok', message: null };
+      } catch (e) {
+        return { id: r.id, name: r.name, status: 'error', message: e.message || String(e) };
+      }
+    })
+  );
+  res.json({ statuses });
+});
+
 router.get('/routers/:id', requireAuth, (req, res) => {
   const r = db.getRouterById(req.params.id);
   if (!r) return res.status(404).json({ error: 'Router tidak ditemukan' });
@@ -334,7 +349,13 @@ router.post('/customers/isolir/:id', requireAuth, async (req, res) => {
   const c = db.getCustomerById(req.params.id);
   if (!c) return res.status(404).json({ error: 'Pelanggan tidak ditemukan' });
   const routerRow = db.getRouterById(c.router_id);
-  if (routerRow) { try { await provisioning.isolateCustomer(routerRow, c); } catch (err) {} }
+  if (routerRow) {
+    try {
+      await provisioning.isolateCustomer(routerRow, c);
+    } catch (err) {
+      return res.status(400).json({ error: 'Gagal isolir di router/RADIUS: ' + (err.message || String(err)) });
+    }
+  }
   await db.updateCustomerStatus(c.id, 'isolir');
   res.json({ ok: true });
 });
@@ -343,7 +364,13 @@ router.post('/customers/aktifkan/:id', requireAuth, async (req, res) => {
   const c = db.getCustomerById(req.params.id);
   if (!c) return res.status(404).json({ error: 'Pelanggan tidak ditemukan' });
   const routerRow = db.getRouterById(c.router_id);
-  if (routerRow) { try { await provisioning.activateCustomer(routerRow, c); } catch (err) {} }
+  if (routerRow) {
+    try {
+      await provisioning.activateCustomer(routerRow, c);
+    } catch (err) {
+      return res.status(400).json({ error: 'Gagal aktifkan di router/RADIUS: ' + (err.message || String(err)) });
+    }
+  }
   await db.updateCustomerStatus(c.id, 'active');
   res.json({ ok: true });
 });
@@ -494,6 +521,10 @@ router.post('/vouchers/generate', requireAuth, async (req, res) => {
     });
   }
   try {
+    const routerRow = router_id ? db.getRouterById(router_id) : null;
+    if (routerRow) {
+      await provisioning.syncVouchersToRouter(routerRow, rows);
+    }
     await db.addVouchers(rows);
     res.json({ ok: true, count: n });
   } catch (e) {

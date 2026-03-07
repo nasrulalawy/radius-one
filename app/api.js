@@ -35,6 +35,7 @@ export const apiCustomer = (id) => get(`/api/customers/${id}`);
 export const apiPackages = async () => (await get('/api/packages')).packages;
 export const apiPackage = (id) => get(`/api/packages/${id}`);
 export const apiRouters = async () => (await get('/api/routers')).routers;
+export const apiRoutersStatus = () => get('/api/routers/status').then((d) => d.statuses);
 export const apiRouter = (id) => get(`/api/routers/${id}`);
 export const apiBills = (unpaidOnly) => get(`/api/bills${unpaidOnly ? '?unpaid=true' : ''}`).then((d) => d.bills);
 export const apiBillsFormData = () => get('/api/bills/form-data');

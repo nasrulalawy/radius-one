@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   apiRouters,
+  apiRoutersStatus,
   apiRouter,
   apiSaveRouter,
   apiDeleteRouter,
@@ -124,12 +125,24 @@ export default function Routers() {
   const [modal, setModal] = useState(null); // null | 'add' | { id }
   const [editingRouter, setEditingRouter] = useState(null);
   const [testingId, setTestingId] = useState(null);
+  const [connectionStatuses, setConnectionStatuses] = useState([]); // { id, status: 'ok'|'error', message? }[]
 
   const load = () => apiRouters().then(setRouters).catch((e) => setError(e.message));
+
+  const loadStatus = () => {
+    apiRoutersStatus().then(setConnectionStatuses).catch(() => setConnectionStatuses([]));
+  };
 
   useEffect(() => {
     load().finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (routers.length === 0) return;
+    loadStatus();
+    const interval = setInterval(loadStatus, 30000);
+    return () => clearInterval(interval);
+  }, [routers.length]);
 
   useEffect(() => {
     if (modal && typeof modal === 'object' && modal.id) {
@@ -154,6 +167,7 @@ export default function Routers() {
     setTestingId(id);
     try {
       await apiTestRouter(id);
+      loadStatus();
       alert('Koneksi berhasil.');
     } catch (e) {
       alert('Gagal: ' + e.message);
@@ -161,6 +175,8 @@ export default function Routers() {
       setTestingId(null);
     }
   };
+
+  const getStatus = (id) => connectionStatuses.find((s) => String(s.id) === String(id));
 
   const showForm = modal === 'add' || (modal && typeof modal === 'object' && modal.id && editingRouter);
   const formRouter = modal === 'add' ? null : editingRouter;
@@ -185,28 +201,51 @@ export default function Routers() {
                 <th className="text-left py-3 px-4 font-semibold text-slate-700">Host</th>
                 <th className="text-left py-3 px-4 font-semibold text-slate-700">Port</th>
                 <th className="text-left py-3 px-4 font-semibold text-slate-700">Mode</th>
+                <th className="text-left py-3 px-4 font-semibold text-slate-700">Status</th>
                 <th className="text-right py-3 px-4 font-semibold text-slate-700">Aksi</th>
               </tr>
             </thead>
             <tbody>
               {routers.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-slate-500">Belum ada router.</td>
+                  <td colSpan={6} className="py-8 text-center text-slate-500">Belum ada router.</td>
                 </tr>
               ) : (
-                routers.map((r) => (
-                  <tr key={r.id} className="border-b border-slate-100 hover:bg-slate-50">
-                    <td className="py-3 px-4 font-medium">{r.name}</td>
-                    <td className="py-3 px-4">{r.host || '-'}</td>
-                    <td className="py-3 px-4">{r.port || '-'}</td>
-                    <td className="py-3 px-4">{r.integration_mode || 'api'}</td>
-                    <td className="py-3 px-4 text-right space-x-2">
-                      <button type="button" onClick={() => handleTest(r.id)} disabled={testingId === r.id} className="text-slate-600 hover:underline text-xs disabled:opacity-50">Test</button>
-                      <button type="button" onClick={() => setModal({ id: r.id })} className="text-sky-600 hover:underline">Edit</button>
-                      <button type="button" onClick={() => handleDelete(r.id, r.name)} className="text-red-600 hover:underline">Hapus</button>
-                    </td>
-                  </tr>
-                ))
+                routers.map((r) => {
+                  const st = getStatus(r.id);
+                  return (
+                    <tr key={r.id} className="border-b border-slate-100 hover:bg-slate-50">
+                      <td className="py-3 px-4 font-medium">{r.name}</td>
+                      <td className="py-3 px-4">{r.host || '-'}</td>
+                      <td className="py-3 px-4">{r.port || '-'}</td>
+                      <td className="py-3 px-4">{r.integration_mode || 'api'}</td>
+                      <td className="py-3 px-4">
+                        {!st ? (
+                          <span className="inline-flex items-center gap-1.5 text-slate-500 text-xs">
+                            <span className="inline-block w-2 h-2 rounded-full bg-slate-300 animate-pulse" />
+                            Cek...
+                          </span>
+                        ) : st.status === 'ok' ? (
+                          <span className="inline-flex items-center gap-1.5 text-green-700 text-xs font-medium" title="Koneksi aktif">
+                            <span className="inline-block w-2 h-2 rounded-full bg-green-500" />
+                            Online
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 text-red-700 text-xs font-medium" title={st.message || 'Koneksi gagal'}>
+                            <span className="inline-block w-2 h-2 rounded-full bg-red-500" />
+                            Offline
+                            {st.message && <span className="max-w-[120px] truncate" title={st.message}>{st.message}</span>}
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-right space-x-2">
+                        <button type="button" onClick={() => handleTest(r.id)} disabled={testingId === r.id} className="text-slate-600 hover:underline text-xs disabled:opacity-50">Test</button>
+                        <button type="button" onClick={() => setModal({ id: r.id })} className="text-sky-600 hover:underline">Edit</button>
+                        <button type="button" onClick={() => handleDelete(r.id, r.name)} className="text-red-600 hover:underline">Hapus</button>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -216,7 +255,7 @@ export default function Routers() {
         <RouterFormModal
           router={formRouter}
           onClose={() => { setModal(null); setEditingRouter(null); }}
-          onSaved={load}
+          onSaved={() => { load(); loadStatus(); }}
         />
       )}
       {modal && typeof modal === 'object' && modal.id && !editingRouter && (

@@ -65,13 +65,39 @@ async function activateCustomer(router, customer) {
 }
 
 async function getLiveSessions(router) {
+  const mode = getMode(router);
+  if (mode === 'radius') {
+    await radiusDb.ping();
+    return { mode, pppActive: 0, hotspotActive: 0 };
+  }
   const api = await mikrotik.connect(router);
   try {
     const counts = await mikrotik.getActiveSessions(api);
     return {
-      mode: getMode(router),
+      mode,
       ...counts,
     };
+  } finally {
+    api.close();
+  }
+}
+
+/**
+ * Sinkron voucher hotspot ke router MikroTik (real API).
+ * @param {Object} router - router row dari DB
+ * @param {Array<{code:string, duration_minutes:number}>} vouchers
+ */
+async function syncVouchersToRouter(router, vouchers) {
+  if (getMode(router) === 'radius') {
+    throw new Error('Voucher hotspot harus ke router mode API, bukan RADIUS');
+  }
+  const api = await mikrotik.connect(router);
+  try {
+    for (const v of vouchers) {
+      const dur = parseInt(v.duration_minutes, 10) || 60;
+      const limitBytes = dur * 10 * 1024 * 1024;
+      await mikrotik.addHotspotVoucher(api, v.code, v.code, limitBytes);
+    }
   } finally {
     api.close();
   }
@@ -84,5 +110,6 @@ module.exports = {
   isolateCustomer,
   activateCustomer,
   getLiveSessions,
+  syncVouchersToRouter,
 };
 
