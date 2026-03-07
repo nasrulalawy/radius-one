@@ -126,11 +126,17 @@ export default function Routers() {
   const [editingRouter, setEditingRouter] = useState(null);
   const [testingId, setTestingId] = useState(null);
   const [connectionStatuses, setConnectionStatuses] = useState([]); // { id, status: 'ok'|'error', message? }[]
+  const [statusLoading, setStatusLoading] = useState(false);
 
   const load = () => apiRouters().then(setRouters).catch((e) => setError(e.message));
 
   const loadStatus = () => {
-    apiRoutersStatus().then(setConnectionStatuses).catch(() => setConnectionStatuses([]));
+    if (routers.length === 0) return;
+    setStatusLoading(true);
+    apiRoutersStatus()
+      .then(setConnectionStatuses)
+      .catch(() => setConnectionStatuses([]))
+      .finally(() => setStatusLoading(false));
   };
 
   useEffect(() => {
@@ -166,9 +172,9 @@ export default function Routers() {
   const handleTest = async (id) => {
     setTestingId(id);
     try {
-      await apiTestRouter(id);
+      const data = await apiTestRouter(id);
       loadStatus();
-      alert('Koneksi berhasil.');
+      alert(data.message || 'Koneksi berhasil.');
     } catch (e) {
       alert('Gagal: ' + e.message);
     } finally {
@@ -188,9 +194,14 @@ export default function Routers() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-2xl font-bold text-slate-800">Router (NAS)</h1>
-        <button type="button" onClick={() => setModal('add')} className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700">
-          + Tambah Router
-        </button>
+        <div className="flex gap-2">
+          <button type="button" onClick={loadStatus} disabled={statusLoading || routers.length === 0} className="px-3 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 text-sm disabled:opacity-50" title="Refresh status koneksi">
+            {statusLoading ? 'Cek...' : '🔄 Status'}
+          </button>
+          <button type="button" onClick={() => setModal('add')} className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700">
+            + Tambah Router
+          </button>
+        </div>
       </div>
       <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
@@ -201,7 +212,7 @@ export default function Routers() {
                 <th className="text-left py-3 px-4 font-semibold text-slate-700">Host</th>
                 <th className="text-left py-3 px-4 font-semibold text-slate-700">Port</th>
                 <th className="text-left py-3 px-4 font-semibold text-slate-700">Mode</th>
-                <th className="text-left py-3 px-4 font-semibold text-slate-700">Status</th>
+                <th className="text-left py-3 px-4 font-semibold text-slate-700">Status Koneksi</th>
                 <th className="text-right py-3 px-4 font-semibold text-slate-700">Aksi</th>
               </tr>
             </thead>
@@ -226,9 +237,18 @@ export default function Routers() {
                             Cek...
                           </span>
                         ) : st.status === 'ok' ? (
-                          <span className="inline-flex items-center gap-1.5 text-green-700 text-xs font-medium" title="Koneksi aktif">
-                            <span className="inline-block w-2 h-2 rounded-full bg-green-500" />
-                            Online
+                          <span className="inline-flex items-center gap-1.5 text-xs font-medium" title={st.hint || 'Koneksi aktif'}>
+                            {(st.mode || '').toLowerCase() === 'radius' ? (
+                              <>
+                                <span className="inline-block w-2 h-2 rounded-full bg-green-500" />
+                                <span className="text-green-700">RADIUS OK</span>
+                              </>
+                            ) : (
+                              <>
+                                <span className="inline-block w-2 h-2 rounded-full bg-green-500" />
+                                <span className="text-green-700">Online</span>
+                              </>
+                            )}
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 text-red-700 text-xs font-medium" title={st.message || 'Koneksi gagal'}>

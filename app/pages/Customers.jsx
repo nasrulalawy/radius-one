@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams, NavLink } from 'react-router-dom';
 import {
   apiCustomers,
   apiCustomersFormData,
@@ -199,6 +200,12 @@ export default function Customers() {
   const showForm = modal === 'add' || (modal && typeof modal === 'object' && modal.id && editingCustomer != null);
   const formCustomer = modal === 'add' ? null : editingCustomer;
 
+  const [searchParams] = useSearchParams();
+  const typeFilter = searchParams.get('type'); // hotspot | pppoe
+  const filteredCustomers = typeFilter
+    ? customers.filter((c) => (c.type || '').toLowerCase() === typeFilter.toLowerCase())
+    : customers;
+
   if (loading) return <div className="text-slate-500">Memuat pelanggan...</div>;
   if (error) return <div className="p-4 rounded-lg bg-red-50 text-red-700">{error}</div>;
 
@@ -206,9 +213,16 @@ export default function Customers() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-2xl font-bold text-slate-800">Pelanggan</h1>
-        <button type="button" onClick={() => setModal('add')} className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700">
-          + Tambah Pelanggan
-        </button>
+        <div className="flex items-center gap-2">
+          <nav className="flex gap-1 p-1 bg-slate-100 rounded-lg">
+            <NavLink to="/customers" end className={({ isActive }) => `px-3 py-1.5 rounded-md text-sm font-medium ${isActive ? 'bg-white text-sky-600 shadow' : 'text-slate-600 hover:text-slate-800'}`}>Semua</NavLink>
+            <NavLink to="/customers?type=hotspot" className={({ isActive }) => `px-3 py-1.5 rounded-md text-sm font-medium ${isActive ? 'bg-white text-sky-600 shadow' : 'text-slate-600 hover:text-slate-800'}`}>Hotspot</NavLink>
+            <NavLink to="/customers?type=pppoe" className={({ isActive }) => `px-3 py-1.5 rounded-md text-sm font-medium ${isActive ? 'bg-white text-sky-600 shadow' : 'text-slate-600 hover:text-slate-800'}`}>PPP</NavLink>
+          </nav>
+          <button type="button" onClick={() => setModal('add')} className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700">
+            + Tambah Pelanggan
+          </button>
+        </div>
       </div>
       <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <table className="w-full text-sm">
@@ -222,12 +236,12 @@ export default function Customers() {
             </tr>
           </thead>
           <tbody>
-            {customers.length === 0 && (
+            {filteredCustomers.length === 0 && (
               <tr>
-                <td colSpan={5} className="py-8 text-center text-slate-500">Belum ada pelanggan.</td>
+                <td colSpan={5} className="py-8 text-center text-slate-500">{typeFilter ? `Tidak ada pelanggan tipe ${typeFilter}.` : 'Belum ada pelanggan.'}</td>
               </tr>
             )}
-            {customers.map((c) => (
+            {filteredCustomers.map((c) => (
               <tr key={c.id} className="border-b border-slate-100 hover:bg-slate-50">
                 <td className="py-3 px-4 font-medium">{c.username}</td>
                 <td className="py-3 px-4">{c.name || '-'}</td>

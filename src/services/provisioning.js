@@ -2,18 +2,19 @@ const mikrotik = require('./mikrotik');
 const radiusDb = require('./radiusDb');
 
 function getMode(router) {
-  return router && router.integration_mode === 'radius' ? 'radius' : 'api';
+  const mode = (router && router.integration_mode || '').toString().toLowerCase();
+  return mode === 'radius' ? 'radius' : 'api';
 }
 
 async function testConnection(router) {
   const mode = getMode(router);
   if (mode === 'radius') {
     await radiusDb.ping();
-    return { mode };
+    return { mode, deviceReachable: null };
   }
   const api = await mikrotik.connect(router);
   api.close();
-  return { mode };
+  return { mode, deviceReachable: true };
 }
 
 async function syncNewCustomer(router, customer) {

@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useLocation, NavLink } from 'react-router-dom';
 import { apiUsersSession } from '../api';
 
 export default function UsersSession() {
+  const location = useLocation();
+  const tab = location.pathname.includes('/ppp') ? 'ppp' : location.pathname.includes('/hotspot') ? 'hotspot' : null;
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -21,7 +24,14 @@ export default function UsersSession() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-slate-800">Users Session</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-2xl font-bold text-slate-800">Users Session</h1>
+        <nav className="flex gap-1 p-1 bg-slate-100 rounded-lg">
+          <NavLink to="/users-session" end className={({ isActive }) => `px-3 py-1.5 rounded-md text-sm font-medium ${isActive ? 'bg-white text-sky-600 shadow' : 'text-slate-600 hover:text-slate-800'}`}>Semua</NavLink>
+          <NavLink to="/users-session/hotspot" className={({ isActive }) => `px-3 py-1.5 rounded-md text-sm font-medium ${isActive ? 'bg-white text-sky-600 shadow' : 'text-slate-600 hover:text-slate-800'}`}>Hotspot</NavLink>
+          <NavLink to="/users-session/ppp" className={({ isActive }) => `px-3 py-1.5 rounded-md text-sm font-medium ${isActive ? 'bg-white text-sky-600 shadow' : 'text-slate-600 hover:text-slate-800'}`}>PPP</NavLink>
+        </nav>
+      </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="rounded-xl border border-slate-200 bg-white p-4">
           <div className="text-2xl font-bold text-sky-600">{stats?.hotspotUsers ?? 0}</div>

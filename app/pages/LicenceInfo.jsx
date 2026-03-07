@@ -5,7 +5,9 @@ export default function LicenceInfo() {
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <p className="font-medium">Radius One</p>
         <p className="text-slate-600 mt-1">Sistem manajemen hotspot & PPPoE.</p>
-        <p className="text-slate-500 text-sm mt-2">Lisensi: penggunaan sesuai kebijakan proyek.</p>
+        <p className="text-slate-700 font-medium mt-4">Lisensi</p>
+        <p className="text-slate-600 mt-1">PT. Alphacsoft Digital Indonesia</p>
+        <p className="text-slate-500 text-sm mt-2">Penggunaan sesuai kebijakan lisensi.</p>
       </div>
     </div>
   );

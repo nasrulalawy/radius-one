@@ -1,16 +1,39 @@
 import { useState, useEffect } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 
-// Struktur: item bisa punya children (submenu). Jika punya children, tampil sebagai dropdown.
+// Semua path punya route di App.jsx; submenu mengarah ke halaman/tab yang benar.
 const navGroups = [
   { title: 'Monitoring', items: [{ to: '/dashboard', icon: '📊', label: 'Dashboard' }, { to: '/users-session', icon: '🟢', label: 'Users Session', children: [{ to: '/users-session/hotspot', label: 'Hotspot' }, { to: '/users-session/ppp', label: 'PPP' }] }] },
-  { title: 'Router & Jaringan', items: [{ to: '/routers', icon: '📡', label: 'Router (NAS)' }, { to: '/odp-pop', icon: '📍', label: 'ODP | POP', children: [{ to: '/odp-pop/map', label: 'View Map' }] }, { to: '/neighbor-list', icon: '📶', label: 'Neighbor List' }] },
+  { title: 'Router & Jaringan', items: [{ to: '/routers', icon: '📡', label: 'Router (NAS)' }, { to: '/odp-pop', icon: '📍', label: 'ODP | POP', children: [{ to: '/odp-pop', label: 'Daftar ODP' }, { to: '/odp-pop/map', label: 'View Map' }] }, { to: '/neighbor-list', icon: '📶', label: 'Neighbor List' }] },
   { title: 'Service Plan', items: [{ to: '/packages', icon: '📶', label: 'Paket' }] },
   { title: 'Pelanggan', items: [{ to: '/customers', icon: '👥', label: 'Pelanggan', children: [{ to: '/customers?type=hotspot', label: 'Hotspot Users' }, { to: '/customers?type=pppoe', label: 'PPP Users' }] }, { to: '/vouchers', icon: '🎫', label: 'Voucher', children: [{ to: '/vouchers/generate', label: 'Hotspot Voucher' }] }, { to: '/vpn-radius', icon: '🔐', label: 'VPN Radius' }] },
   { title: 'Keuangan', items: [{ to: '/bills', icon: '📄', label: 'Tagihan', children: [{ to: '/bills?unpaid=1', label: 'Unpaid Invoice' }] }, { to: '/reports', icon: '📈', label: 'Laporan', children: [{ to: '/reports/payout', label: 'Payout' }, { to: '/reports/net-profit', label: 'Net Profit' }, { to: '/reports/statistics', label: 'Statistics' }] }, { to: '/online-payment', icon: '💳', label: 'Online Payment' }] },
-  { title: 'Support & Tools', items: [{ to: '/support-tickets', icon: '🎧', label: 'Support Tickets', children: [{ to: '/support-tickets?status=open', label: 'Opened' }, { to: '/support-tickets?status=closed', label: 'Closed' }] }, { to: '/system-tools', icon: '🧰', label: 'System Tools', children: [{ to: '/system-tools', label: 'Import User' }, { to: '/system-tools', label: 'Backup Restore' }] }, { to: '/software-logs', icon: '📝', label: 'Software Logs', children: [{ to: '/software-logs/radius-auth', label: 'Radius Auth Log' }] }] },
-  { title: 'Pengaturan', items: [{ to: '/app-settings', icon: '⚙️', label: 'App Settings', children: [{ to: '/app-settings/general', label: 'General' }, { to: '/app-settings/localisation', label: 'Localisation' }, { to: '/app-settings/invoice-logo', label: 'Invoice Logo' }] }, { to: '/licence-info', icon: '📋', label: 'Licence Info' }] },
+  { title: 'Support & Tools', items: [{ to: '/support-tickets', icon: '🎧', label: 'Support Tickets', children: [{ to: '/support-tickets?status=open', label: 'Opened' }, { to: '/support-tickets?status=closed', label: 'Closed' }] }, { to: '/system-tools', icon: '🧰', label: 'System Tools' }, { to: '/software-logs', icon: '📝', label: 'Software Logs', children: [{ to: '/software-logs/radius-auth', label: 'Radius Auth Log' }] }] },
+  { title: 'Pengaturan', items: [{ to: '/app-settings', icon: '⚙️', label: 'App Settings', children: [{ to: '/app-settings/general', label: 'General' }, { to: '/app-settings/radius', label: 'RADIUS' }, { to: '/app-settings/localisation', label: 'Localisation' }, { to: '/app-settings/invoice-logo', label: 'Invoice Logo' }] }, { to: '/licence-info', icon: '📋', label: 'Licence Info' }] },
 ];
+
+/** Submenu pakai <a href> + stopPropagation agar klik tidak tertangkap parent dan browser benar-benar ke URL yang diklik. */
+function SubmenuLinks({ item, location }) {
+  return (
+    <div className="ml-4 mt-0.5 space-y-0.5 border-l border-slate-200 pl-2" onClick={(e) => e.stopPropagation()}>
+      {item.children.map((c) => {
+        const pathOnly = c.to.split('?')[0];
+        const search = c.to.includes('?') ? '?' + c.to.split('?')[1] : '';
+        const isActive = location.pathname === pathOnly && (search ? location.search === search : true);
+        return (
+          <a
+            key={c.to + (c.label || '')}
+            href={c.to}
+            onClick={(e) => e.stopPropagation()}
+            className={`block w-full text-left px-3 py-1.5 rounded-lg text-sm no-underline ${isActive ? 'bg-sky-50 text-sky-600 font-medium' : 'text-slate-600 hover:bg-slate-100'}`}
+          >
+            {c.label}
+          </a>
+        );
+      })}
+    </div>
+  );
+}
 
 function NavItem({ item, isActive }) {
   const location = useLocation();
@@ -43,12 +66,12 @@ function NavItem({ item, isActive }) {
 
   return (
     <div className="mb-0.5">
-      <div className="flex items-center gap-1">
+      <div className={`flex items-center gap-1 rounded-lg ${isActive ? 'bg-slate-50' : ''}`}>
         <NavLink
           to={item.to}
           end
           className={({ isActive: active }) =>
-            `flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${active ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-100'}`
+            `flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${active || isActive ? 'text-sky-600' : 'text-slate-600'} hover:bg-slate-100`
           }
         >
           {item.icon && <span className="text-base">{item.icon}</span>}
@@ -67,19 +90,7 @@ function NavItem({ item, isActive }) {
         </button>
       </div>
       {open && (
-        <div className="ml-4 mt-0.5 space-y-0.5 border-l border-slate-200 pl-2">
-          {item.children.map((c) => (
-            <NavLink
-              key={c.to + (c.label || '')}
-              to={c.to}
-              className={({ isActive: active }) =>
-                `flex items-center px-3 py-1.5 rounded-lg text-sm ${active ? 'bg-sky-50 text-sky-600 font-medium' : 'text-slate-600 hover:bg-slate-100'}`
-              }
-            >
-              {c.label}
-            </NavLink>
-          ))}
-        </div>
+        <SubmenuLinks item={item} location={location} />
       )}
     </div>
   );

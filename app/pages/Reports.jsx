@@ -1,9 +1,19 @@
 import { useState, useEffect } from 'react';
+import { useLocation, NavLink } from 'react-router-dom';
 import { apiReportsPayments, apiReportsStatistics } from '../api';
 
 const fmt = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 
+const tabs = [
+  { path: '/reports', label: 'Semua' },
+  { path: '/reports/payout', label: 'Payout' },
+  { path: '/reports/net-profit', label: 'Net Profit' },
+  { path: '/reports/statistics', label: 'Statistics' },
+];
+
 export default function Reports() {
+  const location = useLocation();
+  const tab = location.pathname.replace('/reports', '') || '/';
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [payments, setPayments] = useState([]);
@@ -32,10 +42,32 @@ export default function Reports() {
 
   if (loading) return <div className="text-slate-500">Memuat...</div>;
 
+  const showPayout = tab === '/' || tab === '/payout';
+  const showNetProfit = tab === '/' || tab === '/net-profit';
+  const showStatistics = tab === '/' || tab === '/statistics';
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-slate-800">Laporan</h1>
-      {stats && (
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-2xl font-bold text-slate-800">Laporan</h1>
+        <nav className="flex gap-1 p-1 bg-slate-100 rounded-lg">
+          {tabs.map((t) => (
+            <NavLink
+              key={t.path}
+              to={t.path}
+              end={t.path === '/reports'}
+              className={({ isActive }) =>
+                `px-3 py-1.5 rounded-md text-sm font-medium ${isActive ? 'bg-white text-sky-600 shadow' : 'text-slate-600 hover:text-slate-800'}`
+              }
+            >
+              {t.label}
+            </NavLink>
+          ))}
+        </nav>
+      </div>
+      {error && <div className="p-3 rounded-lg bg-red-50 text-red-700">{error}</div>}
+
+      {(showStatistics || tab === '/') && stats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="rounded-xl border border-slate-200 bg-white p-4">
             <div className="text-lg font-bold text-sky-600">{stats.paidCount ?? 0}</div>
@@ -55,41 +87,52 @@ export default function Reports() {
           </div>
         </div>
       )}
-      {error && <div className="p-3 rounded-lg bg-red-50 text-red-700">{error}</div>}
-      <div className="rounded-xl border border-slate-200 bg-white p-4">
-        <h2 className="font-semibold text-slate-800 mb-3">Transaksi (filter tanggal)</h2>
-        <div className="flex flex-wrap gap-2 mb-4">
-          <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="px-3 py-2 border rounded-lg" />
-          <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="px-3 py-2 border rounded-lg" />
+
+      {showNetProfit && stats && (
+        <div className="rounded-xl border border-slate-200 bg-white p-4">
+          <h2 className="font-semibold text-slate-800 mb-3">Net Profit (Ringkasan)</h2>
+          <p className="text-slate-600">
+            Total Penerimaan: <strong>{fmt(stats.totalPaid)}</strong> · Total Piutang: <strong>{fmt(stats.totalUnpaid)}</strong>
+          </p>
         </div>
-        <p className="text-slate-600 mb-2">Total: {fmt(total)}</p>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50">
-              <tr>
-                <th className="text-left py-2 px-3">Tanggal</th>
-                <th className="text-left py-2 px-3">Pelanggan</th>
-                <th className="text-left py-2 px-3">Jumlah</th>
-                <th className="text-left py-2 px-3">Metode</th>
-              </tr>
-            </thead>
-            <tbody>
-              {payments.length === 0 ? (
-                <tr><td colSpan={4} className="py-6 text-center text-slate-500">Tidak ada data.</td></tr>
-              ) : (
-                payments.slice(0, 50).map((p, i) => (
-                  <tr key={i} className="border-b border-slate-100">
-                    <td className="py-2 px-3">{(p.paid_at || '').toString().slice(0, 16)}</td>
-                    <td className="py-2 px-3">{p.customer_name || '-'}</td>
-                    <td className="py-2 px-3">{fmt(p.amount)}</td>
-                    <td className="py-2 px-3">{p.method || '-'}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+      )}
+
+      {showPayout && (
+        <div className="rounded-xl border border-slate-200 bg-white p-4">
+          <h2 className="font-semibold text-slate-800 mb-3">Transaksi / Payout (filter tanggal)</h2>
+          <div className="flex flex-wrap gap-2 mb-4">
+            <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="px-3 py-2 border rounded-lg" />
+            <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="px-3 py-2 border rounded-lg" />
+          </div>
+          <p className="text-slate-600 mb-2">Total: {fmt(total)}</p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50">
+                <tr>
+                  <th className="text-left py-2 px-3">Tanggal</th>
+                  <th className="text-left py-2 px-3">Pelanggan</th>
+                  <th className="text-left py-2 px-3">Jumlah</th>
+                  <th className="text-left py-2 px-3">Metode</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payments.length === 0 ? (
+                  <tr><td colSpan={4} className="py-6 text-center text-slate-500">Tidak ada data.</td></tr>
+                ) : (
+                  payments.slice(0, 50).map((p, i) => (
+                    <tr key={i} className="border-b border-slate-100">
+                      <td className="py-2 px-3">{(p.paid_at || '').toString().slice(0, 16)}</td>
+                      <td className="py-2 px-3">{p.customer_name || '-'}</td>
+                      <td className="py-2 px-3">{fmt(p.amount)}</td>
+                      <td className="py-2 px-3">{p.method || '-'}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

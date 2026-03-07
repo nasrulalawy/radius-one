@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useLocation, NavLink } from 'react-router-dom';
 import { apiSoftwareLogs } from '../api';
 
 export default function SoftwareLogs() {
+  const location = useLocation();
+  const isRadiusAuth = location.pathname.includes('/radius-auth');
   const [data, setData] = useState({ logs: [], limit: 200 });
   const [loading, setLoading] = useState(true);
   const [limit, setLimit] = useState(200);
@@ -18,8 +21,12 @@ export default function SoftwareLogs() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-bold text-slate-800">Software Logs</h1>
+        <h1 className="text-2xl font-bold text-slate-800">{isRadiusAuth ? 'Radius Auth Log' : 'Software Logs'}</h1>
         <div className="flex items-center gap-2">
+          <nav className="flex gap-1 p-1 bg-slate-100 rounded-lg">
+            <NavLink to="/software-logs" end className={({ isActive }) => `px-3 py-1.5 rounded-md text-sm font-medium ${isActive ? 'bg-white text-sky-600 shadow' : 'text-slate-600 hover:text-slate-800'}`}>Log Aplikasi</NavLink>
+            <NavLink to="/software-logs/radius-auth" className={({ isActive }) => `px-3 py-1.5 rounded-md text-sm font-medium ${isActive ? 'bg-white text-sky-600 shadow' : 'text-slate-600 hover:text-slate-800'}`}>Radius Auth</NavLink>
+          </nav>
           <label className="text-sm text-slate-600">Limit</label>
           <select value={limit} onChange={(e) => setLimit(Number(e.target.value))} className="px-3 py-2 border border-slate-300 rounded-lg text-sm">
             <option value={50}>50</option>

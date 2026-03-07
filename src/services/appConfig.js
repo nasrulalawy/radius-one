@@ -8,6 +8,7 @@ const defaultSettings = {
   company_email: '',
   invoice_note: 'Terima kasih atas kepercayaan Anda.',
   currency_symbol: 'Rp',
+  radius_secret: '',
 };
 
 function getSettings() {

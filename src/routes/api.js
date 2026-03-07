@@ -196,6 +196,7 @@ router.post('/app-settings', requireAuth, async (req, res) => {
       company_email: (req.body.company_email || '').trim(),
       currency_symbol: (req.body.currency_symbol || 'Rp').trim(),
       invoice_note: (req.body.invoice_note || '').trim(),
+      radius_secret: (req.body.radius_secret || '').trim(),
     });
     res.json({ ok: true });
   } catch (e) {
@@ -219,11 +220,25 @@ router.get('/routers/status', requireAuth, async (req, res) => {
   const list = db.getAllRouters();
   const statuses = await Promise.all(
     list.map(async (r) => {
+      const mode = (r.integration_mode || '').toString().toLowerCase() === 'radius' ? 'radius' : 'api';
       try {
-        await provisioning.testConnection(r);
-        return { id: r.id, name: r.name, status: 'ok', message: null };
+        const result = await provisioning.testConnection(r);
+        const deviceReachable = result.deviceReachable === true;
+        let hint = null;
+        if (mode === 'radius') {
+          hint = 'Backend RADIUS (database) siap. Router harus dikonfigurasi di MikroTik sebagai RADIUS client.';
+        }
+        return {
+          id: r.id,
+          name: r.name,
+          status: 'ok',
+          message: null,
+          mode,
+          deviceReachable,
+          hint,
+        };
       } catch (e) {
-        return { id: r.id, name: r.name, status: 'error', message: e.message || String(e) };
+        return { id: r.id, name: r.name, status: 'error', message: e.message || String(e), mode };
       }
     })
   );
@@ -270,8 +285,18 @@ router.get('/routers/test/:id', requireAuth, async (req, res) => {
   const r = db.getRouterById(req.params.id);
   if (!r) return res.status(404).json({ error: 'Router tidak ditemukan' });
   try {
-    await provisioning.testConnection(r);
-    res.json({ ok: true, name: r.name });
+    const result = await provisioning.testConnection(r);
+    const isRadius = result.mode === 'radius';
+    const message = isRadius
+      ? 'Backend RADIUS (database) siap. Pastikan di MikroTik router sudah dikonfigurasi sebagai RADIUS client (/radius add service=hotspot,ppp address=<IP_RADIUS_SERVER> secret=...).'
+      : 'Koneksi ke router MikroTik (API) berhasil.';
+    res.json({
+      ok: true,
+      name: r.name,
+      mode: result.mode,
+      deviceReachable: result.deviceReachable,
+      message,
+    });
   } catch (e) {
     res.status(400).json({ error: e.message });
   }

@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { apiSupportTickets, apiSaveSupportTicket, apiCloseSupportTicket, apiCustomers } from '../api';
 
 export default function SupportTickets() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const statusParam = searchParams.get('status');
   const [tickets, setTickets] = useState([]);
   const [customers, setCustomers] = useState([]);
-  const [status, setStatus] = useState('all');
+  const [status, setStatus] = useState(statusParam === 'open' || statusParam === 'closed' ? statusParam : 'all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
@@ -19,6 +22,14 @@ export default function SupportTickets() {
 
   useEffect(() => { load(); }, [status]);
   useEffect(() => { apiCustomers().then(setCustomers).catch(() => {}); }, []);
+  useEffect(() => {
+    if (statusParam === 'open' || statusParam === 'closed') setStatus(statusParam);
+  }, [statusParam]);
+  const handleStatusChange = (v) => {
+    setStatus(v);
+    if (v === 'all') setSearchParams({});
+    else setSearchParams({ status: v });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -49,7 +60,7 @@ export default function SupportTickets() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-bold text-slate-800">Support Tickets</h1>
         <div className="flex gap-2">
-          <select value={status} onChange={(e) => setStatus(e.target.value)} className="px-3 py-2 border rounded-lg">
+          <select value={status} onChange={(e) => handleStatusChange(e.target.value)} className="px-3 py-2 border rounded-lg">
             <option value="all">Semua</option>
             <option value="open">Open</option>
             <option value="closed">Closed</option>
