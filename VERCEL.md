@@ -4,17 +4,19 @@ API (Express) bisa dijalankan di Vercel sebagai Serverless Function.
 
 ## Setup
 
-1. **Environment variables** di Vercel Dashboard → Project → Settings → Environment Variables:
-   - `SUPABASE_URL`
-   - `SUPABASE_SERVICE_KEY` (atau `SUPABASE_ANON_KEY`)
-   - `SESSION_SECRET` (opsional, untuk session)
+1. **Environment variables** (wajib) di Vercel Dashboard → Project → Settings → Environment Variables:
+   - `SUPABASE_URL` — URL project Supabase (e.g. https://xxx.supabase.co)
+   - `SUPABASE_SERVICE_KEY` — service role key dari Supabase (Dashboard → Settings → API). Jangan pakai anon key untuk backend.
+   - `SESSION_SECRET` — string rahasia untuk session (opsional)
+
+   Tanpa `SUPABASE_URL` dan `SUPABASE_SERVICE_KEY`, function akan crash. Pastikan keduanya di-set untuk Production (dan Preview jika perlu).
 
 2. Deploy:
    ```bash
    vercel
    ```
 
-3. Semua request (termasuk `/api/*`, `/login`, `/dashboard`, dll.) akan diarahkan ke `api/index.js` yang mem-forward ke Express app.
+3. Jika masih 500: buka URL deploy dan lihat response JSON. Isi `message` dan `hint` akan menjelaskan penyebab (mis. env belum di-set). Cek juga Vercel Dashboard → Project → Logs / Functions.
 
 ## Batasan di Vercel
 
