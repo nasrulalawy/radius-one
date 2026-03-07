@@ -56,12 +56,18 @@ function parseCustomerImportCsv(raw) {
   return rows;
 }
 
-router.get('/', (req, res) => {
-  if (req.session?.userId) return res.redirect('/dashboard');
-  res.redirect('/login');
-});
+// Bila USE_VITE_UI=1, admin pakai React; /, /login, /dashboard diserahkan ke SPA fallback
+const useEjsAdmin = process.env.USE_VITE_UI !== '1';
 
-router.get('/dashboard', requireAuth, (req, res) => {
+if (useEjsAdmin) {
+  router.get('/', (req, res) => {
+    if (req.session?.userId) return res.redirect('/dashboard');
+    res.redirect('/login');
+  });
+}
+
+if (useEjsAdmin) {
+  router.get('/dashboard', requireAuth, (req, res) => {
   const stats = db.getStats();
   const payments = db.getPayments();
   const bills = db.getBills();
@@ -118,6 +124,7 @@ router.get('/dashboard', requireAuth, (req, res) => {
     vouchersUsed: (vouchers || []).filter((v) => parseInt(v.used, 10) === 1).length,
   });
 });
+}
 
 // ---------- Users Session ----------
 router.get('/users-session', requireAuth, async (req, res) => {
@@ -431,29 +438,31 @@ router.post('/support-tickets/close/:id', requireAuth, async (req, res) => {
   res.redirect('/support-tickets?status=open');
 });
 
-router.get('/login', (req, res) => {
-  if (req.session?.userId) return res.redirect('/dashboard');
-  res.render('login', { title: 'Login', error: null });
-});
+if (useEjsAdmin) {
+  router.get('/login', (req, res) => {
+    if (req.session?.userId) return res.redirect('/dashboard');
+    res.render('login', { title: 'Login', error: null });
+  });
 
-router.post('/login', async (req, res) => {
-  const { login: loginFn } = require('../middleware/auth');
-  const user = await loginFn(req.body.username, req.body.password);
-  if (!user) {
-    return res.render('login', { title: 'Login', error: 'Username atau password salah.' });
-  }
-  req.session.userId = user.id;
-  if (user.access_token) {
-    req.session.supabaseAuth = {
-      access_token: user.access_token,
-      refresh_token: user.refresh_token,
-      expires_at: user.expires_at,
-      auth_user_id: user.auth_user_id,
-      email: user.email,
-    };
-  }
-  req.session.save(() => res.redirect('/dashboard'));
-});
+  router.post('/login', async (req, res) => {
+    const { login: loginFn } = require('../middleware/auth');
+    const user = await loginFn(req.body.username, req.body.password);
+    if (!user) {
+      return res.render('login', { title: 'Login', error: 'Username atau password salah.' });
+    }
+    req.session.userId = user.id;
+    if (user.access_token) {
+      req.session.supabaseAuth = {
+        access_token: user.access_token,
+        refresh_token: user.refresh_token,
+        expires_at: user.expires_at,
+        auth_user_id: user.auth_user_id,
+        email: user.email,
+      };
+    }
+    req.session.save(() => res.redirect('/dashboard'));
+  });
+}
 
 router.get('/logout', (req, res) => {
   req.session.destroy(() => res.redirect('/login'));
