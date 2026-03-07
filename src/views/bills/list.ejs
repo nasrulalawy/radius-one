@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Radius One</title>
+  <link rel="stylesheet" href="/css/modern.css">
+</head>
+<body class="app-with-sidebar">
+  <%- include('../partials/sidebar', { active: typeof active !== 'undefined' ? active : 'bills', subactive: typeof subactive !== 'undefined' ? subactive : undefined, user }) %>
+  <div class="app-main">
+    <%- include('../partials/topbar', { title: 'Tagihan' }) %>
+    <div class="app-content">
+    <div class="page-header" style="flex-wrap: wrap; gap: 0.5rem;">
+      <h1 style="margin: 0;"><%= title %></h1>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <a href="/bills/add" class="btn btn-primary">+ Tambah Tagihan</a>
+        <a href="/bills/generate-recurring" class="btn btn-secondary" onclick="return confirm('Generate tagihan bulan depan untuk semua pelanggan aktif?');">Generate tagihan berulang</a>
+      </div>
+    </div>
+    <% if (typeof recurring !== 'undefined' && recurring !== '') { %><div class="alert alert-success">Tagihan berulang: <%= recurring %> tagihan ditambahkan.</div><% } %>
+    <div class="card">
+      <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Pelanggan</th><th>Periode</th><th>Jumlah</th><th>Jatuh tempo</th><th>Status</th><th>Aksi</th></tr>
+        </thead>
+        <tbody>
+          <% if (bills.length) { bills.forEach(function(b) { %>
+          <tr>
+            <td><%= b.customer_name %> (<%= b.username %>)</td>
+            <td><%= b.period_start %> - <%= b.period_end %></td>
+            <td>Rp <%= Number(b.amount).toLocaleString('id-ID') %></td>
+            <td><%= b.due_date || '-' %></td>
+            <td><span class="badge <%= b.status === 'paid' ? 'badge-paid' : 'badge-unpaid' %>"><%= b.status %></span></td>
+            <td>
+              <a href="/bills/<%= b.id %>/invoice" class="btn btn-primary" target="_blank">Invoice</a>
+              <% if (b.status === 'unpaid') { %>
+              <form method="post" action="/bills/bayar/<%= b.id %>" style="display:inline;">
+                <input type="hidden" name="method" value="manual">
+                <button type="submit" class="btn btn-primary">Tandai Lunas</button>
+              </form>
+              <% } else { %>
+              Lunas
+              <% } %>
+            </td>
+          </tr>
+          <% }); } else { %>
+          <tr><td colspan="6" style="color: var(--muted);">Belum ada tagihan. <a href="/bills/add">Tambah tagihan</a>.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+      </div>
+    </div>
+    </div>
+  </div>
+</body>
+</html>

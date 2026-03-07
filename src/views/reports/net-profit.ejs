@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Radius One</title>
+  <link rel="stylesheet" href="/css/modern.css">
+</head>
+<body class="app-with-sidebar">
+  <%- include('../partials/sidebar', { active: 'reports', subactive: 'net-profit', user }) %>
+  <div class="app-main">
+    <%- include('../partials/topbar', { title: 'Net Profit' }) %>
+    <div class="app-content">
+      <h1>Net Profit</h1>
+      <div class="card">
+        <form method="get" action="/reports/net-profit" style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+          <label>Dari</label>
+          <input type="date" name="from" value="<%= from %>">
+          <label>Sampai</label>
+          <input type="date" name="to" value="<%= to %>">
+          <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+      </div>
+      <div class="card">
+        <p class="stat" style="margin-bottom: 1rem;"><span class="num">Rp <%= Number(totalIn).toLocaleString('id-ID') %></span><br><span class="label">Pemasukan (periode terpilih)</span></p>
+        <p class="muted">Laba bersih = Pemasukan - Biaya operasional. Biaya operasional dapat dicatat terpisah.</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

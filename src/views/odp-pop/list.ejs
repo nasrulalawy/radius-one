@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Radius One</title>
+  <link rel="stylesheet" href="/css/modern.css">
+</head>
+<body class="app-with-sidebar">
+  <%- include('../partials/sidebar', { active: 'odp-pop', user }) %>
+  <div class="app-main">
+    <%- include('../partials/topbar', { title: 'ODP | POP Data' }) %>
+    <div class="app-content">
+      <div class="page-header">
+        <h1>ODP | POP Data</h1>
+        <a href="/odp-pop/add" class="btn btn-primary">Tambah ODP/POP</a>
+      </div>
+
+      <% if (saved) { %><div class="alert alert-success">Data ODP/POP tersimpan.</div><% } %>
+      <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+      <div class="card">
+        <% if (!items || items.length === 0) { %>
+          <p class="muted">Belum ada data ODP/POP.</p>
+        <% } else { %>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nama</th>
+                  <th>Tipe</th>
+                  <th>Area</th>
+                  <th>Status</th>
+                  <th>Koordinat</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% items.forEach(function(item) { %>
+                  <tr>
+                    <td><strong><%= item.name %></strong><br><span class="muted"><%= item.address || '-' %></span></td>
+                    <td><%= (item.type || '').toUpperCase() %></td>
+                    <td><%= item.area || '-' %></td>
+                    <td><span class="badge <%= item.status === 'active' ? 'badge-active' : 'badge-unpaid' %>"><%= item.status %></span></td>
+                    <td>
+                      <% if (item.latitude && item.longitude) { %>
+                        <a href="https://maps.google.com/?q=<%= item.latitude %>,<%= item.longitude %>" target="_blank"><%= item.latitude %>, <%= item.longitude %></a>
+                      <% } else { %>
+                        -
+                      <% } %>
+                    </td>
+                    <td>
+                      <a href="/odp-pop/edit/<%= item.id %>" class="btn btn-secondary btn-sm">Edit</a>
+                      <form method="post" action="/odp-pop/delete/<%= item.id %>" style="display:inline;" onsubmit="return confirm('Hapus data ini?')">
+                        <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
+                      </form>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

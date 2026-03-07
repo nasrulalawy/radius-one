@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Radius One</title>
+  <link rel="stylesheet" href="/css/modern.css">
+</head>
+<body class="app-with-sidebar">
+  <%- include('../partials/sidebar', { active: 'vouchers', user }) %>
+  <div class="app-main">
+    <%- include('../partials/topbar', { title: 'Voucher Hotspot' }) %>
+    <div class="app-content">
+    <div class="page-header">
+      <h1><%= title %></h1>
+      <a href="/vouchers/generate" class="btn btn-primary">Generate Voucher</a>
+    </div>
+    <div class="card">
+      <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Kode</th><th>Router</th><th>Paket</th><th>Durasi (menit)</th><th>Digunakan</th><th>Tanggal</th></tr>
+        </thead>
+        <tbody>
+          <% if (vouchers.length) { vouchers.forEach(function(v) { %>
+          <tr>
+            <td><%= v.code %></td>
+            <td><%= v.router_name || '-' %></td>
+            <td><%= v.package_name || '-' %></td>
+            <td><%= v.duration_minutes || '-' %></td>
+            <td><%= v.used ? 'Ya' : 'Tidak' %></td>
+            <td><%= v.created_at %></td>
+          </tr>
+          <% }); } else { %>
+          <tr><td colspan="6" style="color: var(--muted);">Belum ada voucher. <a href="/vouchers/generate">Generate voucher</a>.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+      </div>
+    </div>
+    </div>
+  </div>
+</body>
+</html>

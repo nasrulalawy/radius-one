@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Radius One</title>
+  <link rel="stylesheet" href="/css/modern.css">
+</head>
+<body class="app-with-sidebar">
+  <%- include('../partials/sidebar', { active: 'reports', subactive: 'payout', user }) %>
+  <div class="app-main">
+    <%- include('../partials/topbar', { title: 'Payout' }) %>
+    <div class="app-content">
+      <h1>Payout</h1>
+      <div class="card">
+        <form method="get" action="/reports/payout" style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+          <label>Dari</label>
+          <input type="date" name="from" value="<%= from %>">
+          <label>Sampai</label>
+          <input type="date" name="to" value="<%= to %>">
+          <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+      </div>
+      <div class="card">
+        <p class="stat" style="margin-bottom: 1rem;"><span class="num">Rp <%= Number(total).toLocaleString('id-ID') %></span><br><span class="label">Total payout (pembayaran keluar)</span></p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Tanggal</th><th>Pelanggan</th><th>Jumlah</th><th>Metode</th></tr>
+            </thead>
+            <tbody>
+              <% if (payments.length) { payments.forEach(function(p) { %>
+              <tr>
+                <td><%= (p.paid_at || '').toString().slice(0, 19) %></td>
+                <td><%= p.customer_name || '-' %></td>
+                <td>Rp <%= Number(p.amount).toLocaleString('id-ID') %></td>
+                <td><%= p.method || '-' %></td>
+              </tr>
+              <% }); } else { %>
+              <tr><td colspan="4" style="color: var(--muted);">Tidak ada data dalam periode ini.</td></tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

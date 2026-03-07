@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Radius One</title>
+  <link rel="stylesheet" href="/css/modern.css">
+</head>
+<body class="app-with-sidebar">
+  <%- include('../partials/sidebar', { active: 'odp-pop', user }) %>
+  <div class="app-main">
+    <%- include('../partials/topbar', { title: title }) %>
+    <div class="app-content">
+      <h1><%= title %></h1>
+      <div class="card">
+        <form method="post" action="/odp-pop/save">
+          <% if (item) { %><input type="hidden" name="id" value="<%= item.id %>"><% } %>
+          <div class="form-group">
+            <label>Nama Node</label>
+            <input type="text" name="name" required value="<%= item ? item.name : '' %>">
+          </div>
+          <div class="form-group">
+            <label>Tipe</label>
+            <select name="type">
+              <option value="odp" <%= item && item.type === 'odp' ? 'selected' : '' %>>ODP</option>
+              <option value="pop" <%= item && item.type === 'pop' ? 'selected' : '' %>>POP</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Area</label>
+            <input type="text" name="area" value="<%= item ? item.area : '' %>">
+          </div>
+          <div class="form-group">
+            <label>Alamat</label>
+            <textarea name="address" rows="3"><%= item ? item.address : '' %></textarea>
+          </div>
+          <div class="form-group">
+            <label>Latitude</label>
+            <input type="text" name="latitude" placeholder="-6.123456" value="<%= item ? item.latitude : '' %>">
+          </div>
+          <div class="form-group">
+            <label>Longitude</label>
+            <input type="text" name="longitude" placeholder="106.123456" value="<%= item ? item.longitude : '' %>">
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select name="status">
+              <option value="active" <%= !item || item.status === 'active' ? 'selected' : '' %>>active</option>
+              <option value="inactive" <%= item && item.status === 'inactive' ? 'selected' : '' %>>inactive</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Catatan</label>
+            <textarea name="note" rows="3"><%= item ? item.note : '' %></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Simpan</button>
+          <a href="/odp-pop" class="btn btn-secondary">Batal</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

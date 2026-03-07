@@ -1,0 +1,177 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password_hash": "$2a$10$Wz.qvibVHj6ThW0/ac0N9OSYTzq5D/gu1hzvsigbui8e1mbQg3RcC",
+      "role": "admin"
+    }
+  ],
+  "routers": [
+    {
+      "id": 1,
+      "name": "ELVORA COFFEE",
+      "host": "192.168.88.1",
+      "port": "8728",
+      "username": "admin",
+      "password": "admin123",
+      "is_ssl": 0,
+      "is_active": 1,
+      "use_vpn": 0,
+      "vpn_ip": null,
+      "created_at": "2026-03-04T17:43:17.303Z"
+    }
+  ],
+  "packages": [
+    {
+      "id": 1,
+      "name": "hihihie",
+      "type": "pppoe",
+      "price_monthly": 100000,
+      "speed_limit": "10",
+      "validity_days": null,
+      "created_at": "2026-03-04T17:45:31.378Z"
+    }
+  ],
+  "customers": [
+    {
+      "id": 1,
+      "router_id": 1,
+      "package_id": 1,
+      "name": "adiiii",
+      "username": "admin",
+      "password": "admin123",
+      "type": "pppoe",
+      "status": "active",
+      "address": null,
+      "phone": null,
+      "email": null,
+      "created_at": "2026-03-04T17:45:47.888Z"
+    }
+  ],
+  "bills": [
+    {
+      "id": 1,
+      "customer_id": 1,
+      "period_start": "2026-03-05",
+      "period_end": "2026-03-31",
+      "amount": 100000,
+      "status": "paid",
+      "due_date": "2026-03-05",
+      "paid_at": "2026-03-04T17:46:59.153Z",
+      "created_at": "2026-03-04T17:46:25.129Z"
+    }
+  ],
+  "payments": [
+    {
+      "id": 1,
+      "bill_id": 1,
+      "customer_id": 1,
+      "amount": 100000,
+      "method": "manual",
+      "reference": null,
+      "paid_at": "2026-03-04T17:46:59.153Z"
+    }
+  ],
+  "vouchers": [
+    {
+      "id": 1,
+      "router_id": 1,
+      "package_id": null,
+      "code": "VMMCBX0J10",
+      "duration_minutes": 60,
+      "used": 0,
+      "created_at": "2026-03-04T17:47:11.726Z"
+    },
+    {
+      "id": 2,
+      "router_id": 1,
+      "package_id": null,
+      "code": "VMMCBX0J11",
+      "duration_minutes": 60,
+      "used": 0,
+      "created_at": "2026-03-04T17:47:11.726Z"
+    },
+    {
+      "id": 3,
+      "router_id": 1,
+      "package_id": null,
+      "code": "VMMCBX0J12",
+      "duration_minutes": 60,
+      "used": 0,
+      "created_at": "2026-03-04T17:47:11.726Z"
+    },
+    {
+      "id": 4,
+      "router_id": 1,
+      "package_id": null,
+      "code": "VMMCBX0J13",
+      "duration_minutes": 60,
+      "used": 0,
+      "created_at": "2026-03-04T17:47:11.726Z"
+    },
+    {
+      "id": 5,
+      "router_id": 1,
+      "package_id": null,
+      "code": "VMMCBX0J14",
+      "duration_minutes": 60,
+      "used": 0,
+      "created_at": "2026-03-04T17:47:11.726Z"
+    },
+    {
+      "id": 6,
+      "router_id": 1,
+      "package_id": null,
+      "code": "VMMCBX0J15",
+      "duration_minutes": 60,
+      "used": 0,
+      "created_at": "2026-03-04T17:47:11.726Z"
+    },
+    {
+      "id": 7,
+      "router_id": 1,
+      "package_id": null,
+      "code": "VMMCBX0J16",
+      "duration_minutes": 60,
+      "used": 0,
+      "created_at": "2026-03-04T17:47:11.726Z"
+    },
+    {
+      "id": 8,
+      "router_id": 1,
+      "package_id": null,
+      "code": "VMMCBX0J27",
+      "duration_minutes": 60,
+      "used": 0,
+      "created_at": "2026-03-04T17:47:11.726Z"
+    },
+    {
+      "id": 9,
+      "router_id": 1,
+      "package_id": null,
+      "code": "VMMCBX0J28",
+      "duration_minutes": 60,
+      "used": 0,
+      "created_at": "2026-03-04T17:47:11.726Z"
+    },
+    {
+      "id": 10,
+      "router_id": 1,
+      "package_id": null,
+      "code": "VMMCBX0J29",
+      "duration_minutes": 60,
+      "used": 0,
+      "created_at": "2026-03-04T17:47:11.726Z"
+    }
+  ],
+  "_seq": {
+    "users": 2,
+    "routers": 2,
+    "packages": 2,
+    "customers": 2,
+    "bills": 2,
+    "payments": 2,
+    "vouchers": 11
+  }
+}

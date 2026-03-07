@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Radius One</title>
+  <link rel="stylesheet" href="/css/modern.css">
+</head>
+<body class="app-with-sidebar">
+  <%- include('../partials/sidebar', { active: 'routers', user }) %>
+  <div class="app-main">
+    <%- include('../partials/topbar', { title: title }) %>
+    <div class="app-content">
+    <h1><%= title %></h1>
+    <div class="card">
+      <form method="post" action="/routers/save">
+        <% if (router && router.id) { %><input type="hidden" name="id" value="<%= router.id %>"><% } %>
+        <div class="form-group">
+          <label>Nama Router</label>
+          <input type="text" name="name" value="<%= router ? router.name : '' %>" required>
+        </div>
+        <div class="form-group">
+          <label>Host / IP</label>
+          <input type="text" name="host" value="<%= router ? router.host : '' %>" placeholder="192.168.88.1" required>
+        </div>
+        <div class="form-group">
+          <label>Port API</label>
+          <input type="number" name="port" value="<%= router ? router.port : 8728 %>">
+        </div>
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" name="username" value="<%= router ? router.username : '' %>" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" name="password" value="<%= router ? router.password : '' %>" <%= router ? '' : 'required' %> placeholder="<%= router ? 'Kosongkan jika tidak ubah' : '' %>">
+        </div>
+        <div class="form-group">
+          <label class="checkbox-label"><input type="checkbox" name="is_ssl" value="1" <%= router && router.is_ssl ? 'checked' : '' %>> Gunakan SSL (port 8729)</label>
+        </div>
+        <div class="form-group">
+          <label>Mode Integrasi</label>
+          <select name="integration_mode" required>
+            <option value="api" <%= !router || !router.integration_mode || router.integration_mode === 'api' ? 'selected' : '' %>>MikroTik API</option>
+            <option value="radius" <%= router && router.integration_mode === 'radius' ? 'selected' : '' %>>RADIUS (FreeRADIUS SQL)</option>
+          </select>
+          <span class="muted text-sm">Pilih API untuk sinkron langsung ke router, atau RADIUS untuk sinkron ke database RADIUS.</span>
+        </div>
+        <div class="form-group">
+          <label class="checkbox-label"><input type="checkbox" name="use_vpn" id="use_vpn" value="1" <%= router && router.use_vpn ? 'checked' : '' %>> Gunakan VPN Radius</label>
+        </div>
+        <div class="form-group">
+          <label>IP router di jaringan VPN</label>
+          <input type="text" name="vpn_ip" id="vpn_ip" value="<%= router && router.vpn_ip ? router.vpn_ip : '' %>" placeholder="Contoh: 10.99.0.2">
+          <span class="muted text-sm">Isi jika router sudah connect ke VPN Radius.</span>
+        </div>
+        <button type="submit" class="btn btn-primary">Simpan</button>
+        <a href="/routers" class="btn btn-secondary">Batal</a>
+      </form>
+    </div>
+    </div>
+  </div>
+</body>
+</html>

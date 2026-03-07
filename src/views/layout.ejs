@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Radius One</title>
+  <style>
+    :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #e2e8f0; --muted: #94a3b8; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .nav { background: var(--card); padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 1.5rem; border-bottom: 1px solid #334155; }
+    .nav a { color: var(--accent); text-decoration: none; }
+    .nav a:hover { text-decoration: underline; }
+    .nav .brand { font-weight: 700; margin-right: auto; }
+    main { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+    h1 { font-size: 1.5rem; margin-top: 0; }
+    .card { background: var(--card); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; border: 1px solid #334155; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 0.6rem; border-bottom: 1px solid #334155; }
+    th { color: var(--muted); font-weight: 600; }
+    input, select, textarea { padding: 0.5rem; border: 1px solid #475569; border-radius: 6px; background: var(--bg); color: var(--text); width: 100%; max-width: 320px; }
+    label { display: block; margin-bottom: 0.25rem; color: var(--muted); font-size: 0.9rem; }
+    .form-group { margin-bottom: 1rem; }
+    .btn { display: inline-block; padding: 0.5rem 1rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.9rem; text-decoration: none; }
+    .btn-primary { background: var(--accent); color: var(--bg); }
+    .btn-danger { background: #dc2626; color: #fff; }
+    .btn-secondary { background: #475569; color: var(--text); }
+    .btn-sm { padding: 0.35rem 0.7rem; font-size: 0.85rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
+    .stat { background: var(--card); border-radius: 8px; padding: 1rem; border: 1px solid #334155; }
+    .stat .num { font-size: 1.75rem; font-weight: 700; color: var(--accent); }
+    .stat .label { color: var(--muted); font-size: 0.9rem); }
+    .alert { padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem; }
+    .alert-error { background: #7f1d1d; color: #fecaca; }
+    .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .login-box { width: 100%; max-width: 360px; }
+  </style>
+</head>
+<body>
+  <% if (typeof user !== 'undefined' && user) { %>
+  <nav class="nav">
+    <a href="/dashboard" class="brand">Radius One</a>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/routers">Router</a>
+    <a href="/packages">Paket</a>
+    <a href="/customers">Pelanggan</a>
+    <a href="/bills">Tagihan</a>
+    <a href="/vouchers">Voucher</a>
+    <span style="color: var(--muted);"><%= user.username %></span>
+    <a href="/logout">Logout</a>
+  </nav>
+  <% } %>
+  <main>
+    <%- body %>
+  </main>
+</body>
+</html>

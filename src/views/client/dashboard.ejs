@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Radius One</title>
+  <link rel="stylesheet" href="/css/modern.css">
+</head>
+<body>
+  <nav class="nav">
+    <span class="brand">Portal Pelanggan</span>
+    <a href="/client">Beranda</a>
+    <a href="/client/bills">Tagihan</a>
+    <span style="color: var(--muted);"><%= customer.name %> (<%= customer.username %>)</span>
+    <a href="/client/logout">Logout</a>
+  </nav>
+  <main>
+    <% if (typeof paid !== 'undefined' && paid) { %><div class="alert alert-success">Pembayaran tercatat. Terima kasih.</div><% } %>
+    <h1>Selamat datang, <%= customer.name %></h1>
+    <div class="card">
+      <p style="color: var(--muted);">Tagihan belum lunas</p>
+      <p class="stat"><%= unpaidCount %> tagihan — Rp <%= Number(totalUnpaid).toLocaleString('id-ID') %></p>
+      <a href="/client/bills" class="btn btn-primary">Lihat tagihan</a>
+    </div>
+    <div class="card">
+      <p style="color: var(--muted);">Riwayat tagihan terbaru</p>
+      <ul style="padding-left: 1.25rem;">
+        <% bills.slice(0, 5).forEach(function(b) { %>
+        <li><%= b.period_start %> s/d <%= b.period_end %> — Rp <%= Number(b.amount).toLocaleString('id-ID') %> — <strong><%= b.status %></strong></li>
+        <% }); %>
+      </ul>
+      <% if (bills.length === 0) { %><p class="muted">Belum ada tagihan.</p><% } %>
+    </div>
+  </main>
+</body>
+</html>

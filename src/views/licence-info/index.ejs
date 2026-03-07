@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Radius One</title>
+  <link rel="stylesheet" href="/css/modern.css">
+</head>
+<body class="app-with-sidebar">
+  <%- include('../partials/sidebar', { active: 'licence-info', user }) %>
+  <div class="app-main">
+    <%- include('../partials/topbar', { title: 'Licence Info' }) %>
+    <div class="app-content">
+      <h1>Licence Info</h1>
+      <div class="card">
+        <p><strong>Radius One</strong> — Sistem manajemen hotspot & PPPoE.</p>
+        <p class="muted">Lisensi: penggunaan sesuai kebijakan proyek.</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

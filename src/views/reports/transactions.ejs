@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Radius One</title>
+  <link rel="stylesheet" href="/css/modern.css">
+</head>
+<body class="app-with-sidebar">
+  <%- include('../partials/sidebar', { active: typeof active !== 'undefined' ? active : 'reports', subactive: typeof subactive !== 'undefined' ? subactive : undefined, user }) %>
+  <div class="app-main">
+    <%- include('../partials/topbar', { title: 'Laporan Transaksi' }) %>
+    <div class="app-content">
+    <h1><%= title %></h1>
+    <div class="card">
+      <form method="get" action="/reports" style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+        <label>Dari</label>
+        <input type="date" name="from" value="<%= from %>">
+        <label>Sampai</label>
+        <input type="date" name="to" value="<%= to %>">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a href="/reports/export?from=<%= encodeURIComponent(from) %>&to=<%= encodeURIComponent(to) %>" class="btn btn-primary">Export CSV</a>
+      </form>
+    </div>
+    <div class="card">
+      <p class="stat" style="margin-bottom: 1rem;"><span class="num">Rp <%= Number(total).toLocaleString('id-ID') %></span><br><span class="label">Total pemasukan</span></p>
+      <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Tanggal</th><th>Pelanggan</th><th>Jumlah</th><th>Metode</th></tr>
+        </thead>
+        <tbody>
+          <% if (payments.length) { payments.forEach(function(p) { %>
+          <tr>
+            <td><%= (p.paid_at || '').toString().slice(0, 19) %></td>
+            <td><%= p.customer_name || '-' %></td>
+            <td>Rp <%= Number(p.amount).toLocaleString('id-ID') %></td>
+            <td><%= p.method || '-' %></td>
+          </tr>
+          <% }); } else { %>
+          <tr><td colspan="4" style="color: var(--muted);">Tidak ada data dalam periode ini.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+      </div>
+    </div>
+    </div>
+  </div>
+</body>
+</html>

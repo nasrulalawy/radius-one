@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice #<%= bill.id %> - Radius One</title>
+  <link rel="stylesheet" href="/css/modern.css">
+  <style>
+    .invoice-page .invoice { font-family: var(--font); }
+    .invoice-page .total { font-size: 1.25rem; font-weight: 700; color: var(--accent); }
+    @media print { .no-print { display: none !important; } body { margin: 0; background: #fff; } }
+  </style>
+</head>
+<body class="invoice-page">
+  <div class="invoice">
+    <h1>INVOICE #<%= bill.id %></h1>
+    <p style="margin-top:-0.5rem;">
+      <strong><%= settings && settings.company_name ? settings.company_name : 'Radius One Network' %></strong><br>
+      <span style="color:#666;font-size:0.9rem;">
+        <%= settings && settings.company_address ? settings.company_address : '' %>
+        <% if (settings && settings.company_phone) { %> | Telp: <%= settings.company_phone %><% } %>
+        <% if (settings && settings.company_email) { %> | Email: <%= settings.company_email %><% } %>
+      </span>
+    </p>
+    <div class="meta">
+      Tanggal: <%= (bill.created_at || '').toString().slice(0, 10) %> &nbsp;|&nbsp;
+      Jatuh tempo: <%= bill.due_date || '-' %>
+    </div>
+    <p><strong>Kepada:</strong><br>
+      <%= customer ? customer.name : '-' %><br>
+      <%= customer ? customer.username : '' %> &nbsp;|&nbsp;
+      <%= customer && customer.address ? customer.address : '' %> &nbsp;|&nbsp;
+      <%= customer && customer.phone ? customer.phone : '' %>
+    </p>
+    <table>
+      <thead>
+        <tr><th>Deskripsi</th><th>Periode</th><th>Jumlah</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Tagihan internet</td>
+          <td><%= bill.period_start %> s/d <%= bill.period_end %></td>
+          <td><%= settings && settings.currency_symbol ? settings.currency_symbol : 'Rp' %> <%= Number(bill.amount).toLocaleString('id-ID') %></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="total">Total: <%= settings && settings.currency_symbol ? settings.currency_symbol : 'Rp' %> <%= Number(bill.amount).toLocaleString('id-ID') %></p>
+    <p style="color: #666; font-size: 0.9rem;">Status: <strong><%= bill.status %></strong><% if (bill.paid_at) { %> — Dibayar pada <%= (bill.paid_at || '').toString().slice(0, 10) %><% } %></p>
+    <% if (settings && settings.invoice_note) { %>
+      <p style="color:#666;font-size:0.9rem;margin-top:1rem;"><%= settings.invoice_note %></p>
+    <% } %>
+    <div class="no-print" style="margin-top: 1.5rem;">
+      <button type="button" onclick="window.print()" class="btn btn-primary">Cetak / Simpan PDF</button>
+      <a href="/bills" class="btn btn-secondary" style="margin-left: 0.5rem;">Kembali ke tagihan</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,36 @@
+{
+  "name": "radius-one",
+  "version": "1.0.0",
+  "description": "Aplikasi Billing MikroTik PPPoE & Hotspot - ISP / RT RW Net",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "init-db": "node src/scripts/initDb.js"
+  },
+  "keywords": [
+    "mikrotik",
+    "billing",
+    "pppoe",
+    "hotspot",
+    "isp"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.21.1",
+    "express-session": "^1.18.0",
+    "lowdb": "^7.0.1",
+    "mysql2": "^3.14.5",
+    "node-routeros": "^1.6.9",
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "playwright": "^1.58.2"
+  }
+}

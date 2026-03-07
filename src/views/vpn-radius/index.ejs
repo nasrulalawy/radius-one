@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Radius One</title>
+  <link rel="stylesheet" href="/css/modern.css">
+</head>
+<body class="app-with-sidebar">
+  <%- include('../partials/sidebar', { active: 'vpn-radius', user }) %>
+  <div class="app-main">
+    <%- include('../partials/topbar', { title: 'VPN Radius' }) %>
+    <div class="app-content">
+    <h1>VPN Radius</h1>
+    <p class="muted">Kelola profile VPN dari database (multi profile), generate config WireGuard, lalu simpan IP VPN ke router.</p>
+
+    <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+    <% if (saved) { %><div class="alert alert-success">Perubahan profile VPN tersimpan.</div><% } %>
+
+    <div class="card">
+      <h2>1. Profile VPN (database)</h2>
+      <p class="muted">Bisa simpan banyak profile VPN, lalu pilih profile aktif untuk generate config.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Nama</th><th>Endpoint</th><th>Network</th><th>Status</th><th>Aksi</th></tr>
+          </thead>
+          <tbody>
+            <% if (profiles && profiles.length) { profiles.forEach(function(p) { %>
+            <tr>
+              <td><%= p.name %></td>
+              <td><%= p.server_endpoint %></td>
+              <td><%= p.vpn_network %></td>
+              <td><%= activeProfile && activeProfile.id === p.id ? 'Aktif' : '-' %></td>
+              <td>
+                <% if (!activeProfile || activeProfile.id !== p.id) { %>
+                <form method="post" action="/vpn-radius/profiles/activate" style="display:inline;">
+                  <input type="hidden" name="profile_id" value="<%= p.id %>">
+                  <button type="submit" class="btn btn-sm btn-secondary">Pakai</button>
+                </form>
+                <% } %>
+                <% if (p.id !== 'env-default') { %>
+                <form method="post" action="/vpn-radius/profiles/delete/<%= p.id %>" style="display:inline;" onsubmit="return confirm('Hapus profile ini?');">
+                  <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                </form>
+                <% } %>
+              </td>
+            </tr>
+            <% }); } else { %>
+            <tr><td colspan="5" class="muted">Belum ada profile VPN. Tambahkan profile baru di form bawah.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+      <hr style="margin: 1rem 0; border-color: var(--line);">
+      <form method="post" action="/vpn-radius/profiles/add">
+        <div class="form-group">
+          <label>Nama profile</label>
+          <input type="text" name="name" required placeholder="Contoh: POP Jakarta">
+        </div>
+        <div class="form-group">
+          <label>Server endpoint</label>
+          <input type="text" name="server_endpoint" required placeholder="Contoh: 203.0.113.10:51820">
+        </div>
+        <div class="form-group">
+          <label>Server public key</label>
+          <input type="text" name="server_public_key" required placeholder="Public key interface WireGuard server">
+        </div>
+        <div class="form-group">
+          <label>VPN network</label>
+          <input type="text" name="vpn_network" required value="10.99.0.0/24">
+        </div>
+        <button type="submit" class="btn btn-primary">Tambah Profile</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>2. Daftar router & generate config</h2>
+      <p class="muted">Profile aktif: <strong><%= activeProfile ? activeProfile.name : 'Belum ada' %></strong>. Pilih router, generate config WireGuard, lalu simpan IP VPN ke router.</p>
+      <table>
+        <thead>
+          <tr><th>Nama</th><th>Host / VPN IP</th><th>Aksi</th></tr>
+        </thead>
+        <tbody>
+          <% if (routers.length) { routers.forEach(function(r) { %>
+          <tr>
+            <td><%= r.name %></td>
+            <td><%= r.use_vpn && r.vpn_ip ? r.vpn_ip : (r.host || '-') %></td>
+            <td>
+              <% if (activeProfile) { %>
+              <a href="/vpn-radius/generate/<%= r.id %>" class="btn btn-primary">Generate config VPN</a>
+              <% } else { %>
+              <span class="muted">Buat profile dulu</span>
+              <% } %>
+            </td>
+          </tr>
+          <% }); } else { %>
+          <tr><td colspan="3" class="muted">Belum ada router. <a href="/routers/add">Tambah router</a> dulu.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <% if (typeof generated !== 'undefined' && generated) { %>
+    <div class="card" style="border-color: var(--accent);">
+      <h2>Config untuk: <%= generated.routerName %> (IP VPN: <%= generated.vpnIp %>)</h2>
+      <p class="muted">Profile: <strong><%= generated.profileName %></strong> - Network: <strong><%= generated.vpnNetwork %></strong></p>
+      <p class="muted">1) Tambahkan [Peer] berikut ke config WireGuard SERVER (di server jalankan: <code>sudo wg addconf wg0 /dev/stdin</code> lalu paste [Peer] block)</p>
+      <pre><%= generated.serverPeerBlock %></pre>
+      <p class="muted">2) Di MikroTik (RouterOS 7): Interface → WireGuard → Add. Paste config client di bawah, atau input manual (Private Key, Address, Peer Public Key, Endpoint).</p>
+      <pre><%= generated.clientConfig %></pre>
+      <p class="muted">3) Setelah router connect ke VPN, simpan IP VPN ke router ini agar aplikasi pakai IP VPN untuk API.</p>
+      <form method="post" action="/vpn-radius/apply" style="margin-top:0.75rem;">
+        <input type="hidden" name="router_id" value="<%= generated.routerId %>">
+        <input type="hidden" name="vpn_ip" value="<%= generated.vpnIp %>">
+        <input type="hidden" name="profile_id" value="<%= generated.profileId %>">
+        <button type="submit" class="btn btn-primary">Simpan IP <%= generated.vpnIp %> ke router "<%= generated.routerName %>"</button>
+      </form>
+    </div>
+    <% } %>
+
+    <div class="card alert alert-warn">
+      <strong>Catatan:</strong> Server Anda harus menjalankan WireGuard dan punya IP publik (atau IP yang bisa diakses router). Router di lokasi pelanggan connect ke server; setelah connect, aplikasi Radius One mengakses router lewat IP VPN (mis. 10.99.0.2).
+    </div>
+    </div>
+  </div>
+</body>
+</html>

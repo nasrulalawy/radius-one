@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Radius One</title>
+  <link rel="stylesheet" href="/css/modern.css">
+</head>
+<body class="app-with-sidebar">
+  <%- include('../partials/sidebar', { active: 'users-session', subactive: 'ppp', user }) %>
+  <div class="app-main">
+    <%- include('../partials/topbar', { title: 'Users Session - PPP' }) %>
+    <div class="app-content">
+      <h1>Users Session - PPP</h1>
+      <div class="card">
+        <h2>Live Session per Router</h2>
+        <% if (!perRouterLive || perRouterLive.length === 0) { %>
+          <p class="muted">Belum ada router terdaftar.</p>
+        <% } else { %>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Router</th>
+                  <th>Hotspot Active</th>
+                  <th>PPPoE Active</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% perRouterLive.forEach(function(row) { %>
+                  <tr>
+                    <td><%= row.router.name %></td>
+                    <td><%= row.hotspotActive %></td>
+                    <td><%= row.pppActive %></td>
+                    <td>
+                      <% if (row.ok) { %>
+                        <span class="badge badge-active">OK</span>
+                      <% } else { %>
+                        <span class="badge badge-unpaid"><%= row.error || 'Error' %></span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+      <div class="card">
+        <h2>PPPoE Users</h2>
+        <% if (!pppUsers || pppUsers.length === 0) { %>
+          <p class="muted">Belum ada user PPPoE.</p>
+        <% } else { %>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Package</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% pppUsers.forEach(function(c) { %>
+                  <tr>
+                    <td><%= c.username %></td>
+                    <td><%= c.package_name || '-' %></td>
+                    <td><span class="badge <%= c.status === 'active' ? 'badge-active' : 'badge-unpaid' %>"><%= c.status %></span></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

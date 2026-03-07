@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Radius One</title>
+  <link rel="stylesheet" href="/css/modern.css">
+</head>
+<body class="login-page">
+  <div class="login-box">
+    <h1>Portal Pelanggan</h1>
+    <p class="subtitle">Login dengan username & password internet Anda</p>
+    <% if (typeof error !== 'undefined' && error) { %><div class="alert alert-error"><%= error %></div><% } %>
+    <form method="post" action="/client/login">
+      <input type="text" name="username" placeholder="Username" required autofocus>
+      <input type="password" name="password" placeholder="Password" required>
+      <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+    <p class="footer"><a href="/login">Login Admin</a></p>
+  </div>
+</body>
+</html>
