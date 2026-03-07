@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+/* Custom base */
+body {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}

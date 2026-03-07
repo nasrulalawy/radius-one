@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
+    "dev:client": "cd client && npm run dev",
+    "build:client": "cd client && npm install && npm run build",
     "init-db": "node src/scripts/initDb.js"
   },
   "keywords": [

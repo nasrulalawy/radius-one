@@ -23,6 +23,9 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 // Public folder di root project (bukan src/public)
 app.use(express.static(path.join(process.cwd(), 'public')));
+// SPA (Vite build) - serve React app for non-API routes in production
+const clientDist = path.join(process.cwd(), 'client', 'dist');
+app.use(express.static(clientDist));
 
 function sanitizeBody(body) {
   if (!body || typeof body !== 'object') return {};
@@ -52,14 +55,32 @@ app.use((req, res, next) => {
   next();
 });
 
+// REST API for Vite/React frontend
+app.use('/api', require('./routes/api'));
+
 app.use(routes);
 
-const db = require('./db');
-
-(async function start() {
-  await db.init();
-  app.listen(PORT, () => {
-    console.log(`Radius One Billing berjalan di http://localhost:${PORT}`);
-    console.log('Database: Supabase (PostgreSQL)');
+// SPA fallback: bila USE_VITE_UI=1, kirim index.html untuk path yang tidak ditangani (React Router)
+if (process.env.USE_VITE_UI === '1') {
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/client')) return next();
+    const fs = require('fs');
+    const indexHtml = path.join(clientDist, 'index.html');
+    if (fs.existsSync(indexHtml)) res.sendFile(indexHtml);
+    else next();
   });
-})();
+}
+
+// Vercel: export app only (no listen). api/index.js will call db.init() and forward (req, res).
+if (process.env.VERCEL === '1') {
+  module.exports = app;
+} else {
+  const db = require('./db');
+  (async function start() {
+    await db.init();
+    app.listen(PORT, () => {
+      console.log(`Radius One Billing berjalan di http://localhost:${PORT}`);
+      console.log('Database: Supabase (PostgreSQL)');
+    });
+  })();
+}
