@@ -1,0 +1,14 @@
+{
+  "name": "radiusone-radius-server",
+  "version": "1.0.0",
+  "description": "RADIUS server for RadiusOne - auth & accounting via Supabase",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "radius": "^1.1.4",
+    "@supabase/supabase-js": "^2.45.0",
+    "dotenv": "^16.4.5"
+  }
+}
