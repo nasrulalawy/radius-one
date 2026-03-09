@@ -1,9 +1,8 @@
 import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
 import type { NasDevice } from '../lib/supabase'
-import { Plus, Pencil, Trash2, Search, ExternalLink, BarChart3 } from 'lucide-react'
+import { Plus, Pencil, Trash2, ExternalLink, BarChart3 } from 'lucide-react'
 
-const NAS_TYPES = ['mikrotik', 'cisco', 'chillispot', 'pfSense', 'dd-wrt', 'access_point', 'other']
 const PAGE_SIZES = [10, 25, 50, 100]
 
 export default function Nas() {

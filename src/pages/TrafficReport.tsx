@@ -54,7 +54,10 @@ export default function TrafficReport() {
             <YAxis type="category" dataKey="username" stroke="var(--text-muted)" fontSize={11} width={85} tick={{ fontSize: 10 }} />
             <Tooltip
               contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8 }}
-              formatter={(v: number, _n: string, props: { payload: { full: string; gb: string } }) => [v + ' MB (' + props.payload.gb + ' GB)', props.payload.full]}
+              formatter={(v: number, _n: string, props: { payload?: { full: string; gb: string } }) => {
+                const p = props?.payload
+                return p ? [v + ' MB (' + p.gb + ' GB)', p.full] : [String(v) + ' MB', '']
+              }}
               labelFormatter={() => ''}
             />
             <Bar dataKey="mb" fill="#38bdf8" radius={[0, 4, 4, 0]} name="MB" />

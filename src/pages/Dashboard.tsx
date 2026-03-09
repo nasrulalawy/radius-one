@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { Users, Server, Package, Radio, Wallet, TrendingUp, Activity } from 'lucide-react'
+import { Users, Server, Package, Radio, Wallet } from 'lucide-react'
 import {
   AreaChart,
   Area,
@@ -14,7 +14,6 @@ import {
   Cell,
   BarChart,
   Bar,
-  Legend,
 } from 'recharts'
 
 type PaymentRow = { amount: number; created_at: string }

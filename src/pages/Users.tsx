@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
 import type { RadiusUser } from '../lib/supabase'
-import { Plus, Pencil, Trash2, Search, Download } from 'lucide-react'
+import { Plus, Pencil, Trash2, Download } from 'lucide-react'
 
 function downloadCsv(rows: Record<string, unknown>[], filename: string) {
   if (rows.length === 0) return
