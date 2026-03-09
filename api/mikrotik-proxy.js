@@ -1,21 +1,21 @@
 const SUPABASE_URL = (process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL ?? '').replace(/\/$/, '')
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY ?? process.env.SUPABASE_ANON_KEY ?? ''
 
-const ALLOWED = ['mikrotik-test', 'mikrotik-check-all', 'mikrotik-disconnect'] as const
+const ALLOWED = ['mikrotik-test', 'mikrotik-check-all', 'mikrotik-disconnect']
 
-function jsonResponse(data: object, status = 200) {
+function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
     headers: { 'Content-Type': 'application/json' },
   })
 }
 
-export async function POST(request: Request) {
+export async function POST(request) {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     return jsonResponse({ ok: false, message: 'Server: missing Supabase env' }, 500)
   }
   const url = new URL(request.url)
-  const fn = url.searchParams.get('fn') as typeof ALLOWED[number] | null
+  const fn = url.searchParams.get('fn')
   if (!fn || !ALLOWED.includes(fn)) {
     return jsonResponse({ ok: false, message: 'Missing or invalid ?fn= (mikrotik-test | mikrotik-check-all | mikrotik-disconnect)' }, 400)
   }
