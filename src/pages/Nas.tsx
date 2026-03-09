@@ -19,6 +19,7 @@ export default function Nas() {
   const [testMessage, setTestMessage] = useState<string | null>(null)
   const [checkAllLoading, setCheckAllLoading] = useState(false)
   const [radiusServerAddress, setRadiusServerAddress] = useState<string>('')
+  const [exportScript, setExportScript] = useState<string | null>(null)
   const [form, setForm] = useState({
     auth_port: '1812',
     acct_port: '1813',
@@ -222,6 +223,41 @@ export default function Nas() {
     setTestLoading(false)
   }
 
+  const generateExportScript = () => {
+    const serverIp = radiusServerAddress || 'RADIUS_SERVER_IP'
+    const secret = (editing?.secret || form.secret || 'RADIUS_SECRET').trim() || 'RADIUS_SECRET'
+    const authPort = form.auth_port || '1812'
+    const acctPort = form.acct_port || '1813'
+
+    const script = [
+      '# Script konfigurasi dasar RADIUS untuk RadiusOne',
+      '# Sesuaikan RADIUS_SERVER_IP dan RADIUS_SECRET jika perlu',
+      '',
+      '/radius',
+      `add service=pppoe,hotspot,address-list authenticate=yes accounting=yes \\`,
+      `    address=${serverIp} secret="${secret}" \\`,
+      `    authentication-port=${authPort} accounting-port=${acctPort} timeout=300ms disabled=no`,
+      '',
+      '/ppp profile',
+      'set default use-radius=yes',
+      'set default-encryption use-radius=yes',
+      '',
+      '/ip hotspot profile',
+      'set [ find default=yes ] use-radius=yes',
+      '',
+      '# Optional: interval accounting (update setiap 5 menit)',
+      `/radius`,
+      `set [find address=${serverIp}] accounting-backup=no accounting-interval=00:05:00`,
+      '',
+      '# Catatan:',
+      '# - address      : IP server RADIUS (RadiusOne backend / radius-server).',
+      '# - secret       : sama dengan Radius Secret di halaman Router [NAS].',
+      '# - Router Address di RadiusOne: isi dengan IP MikroTik yang dipakai kirim RADIUS (LAN/VPN).',
+    ].join('\n')
+
+    setExportScript(script)
+  }
+
   const checkAllRouters = async () => {
     setCheckAllLoading(true)
     try {
@@ -261,6 +297,7 @@ export default function Nas() {
             </li>
           ) : null}
           <li><strong>Export konfigurasi profil ke router</strong> (sync ke MikroTik): saat ini tidak tersedia; validasi paket dilakukan via RADIUS server.</li>
+          <li>Router tanpa IP publik atau hanya lewat <strong>VPN/WireGuard</strong>: isi Router Address dengan IP MikroTik di jaringan VPN; RADIUS tetap jalan. Test Connection dari dashboard mungkin gagal (cloud tidak punya akses VPN). Lihat <code>docs/MIKROTIK-VPN-WIREGUARD.md</code>.</li>
         </ul>
       </div>
       <div className="card" style={{ marginBottom: '1rem', padding: '0.75rem 1rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center' }}>
@@ -427,12 +464,45 @@ export default function Nas() {
             {testMessage && (
               <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9rem', color: testMessage.startsWith('✓') ? 'var(--success)' : 'var(--text-muted)' }}>{testMessage}</p>
             )}
+            {exportScript && (
+              <div style={{ marginTop: '1rem' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
+                  Script Mikrotik (copy-paste ke terminal):
+                </label>
+                <textarea
+                  value={exportScript}
+                  readOnly
+                  rows={10}
+                  style={{ width: '100%', fontFamily: 'var(--font-mono, monospace)', fontSize: '0.8rem', resize: 'vertical' }}
+                  onFocus={(e) => e.currentTarget.select()}
+                />
+              </div>
+            )}
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
               <button type="button" className="btn btn-primary" onClick={save}>{modal === 'add' ? 'Tambah Router' : 'Simpan'}</button>
               <button type="button" className="btn btn-ghost" onClick={testConnection} disabled={testLoading}>
                 {testLoading ? 'Mengecek...' : 'Test Connection'}
               </button>
-              <button type="button" className="btn btn-ghost" onClick={() => { setModal(null); setTestMessage(null); }}>Batal</button>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={generateExportScript}
+                disabled={!radiusServerAddress && !form.auth_port}
+                title={radiusServerAddress ? 'Generate script konfigurasi RADIUS di MikroTik' : 'Isi dulu alamat RADIUS server di Settings'}
+              >
+                Export Script MikroTik
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={() => {
+                  setModal(null)
+                  setTestMessage(null)
+                  setExportScript(null)
+                }}
+              >
+                Batal
+              </button>
             </div>
           </div>
         </div>

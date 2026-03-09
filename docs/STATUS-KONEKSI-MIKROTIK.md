@@ -21,7 +21,7 @@
    - Tambah / edit / hapus router, simpan IP, secret, API username/password, time zone, dll.
    - **Test Connection**: Edge Function `mikrotik-test` memanggil REST API MikroTik (RouterOS 7), mengisi `ping_status` dan `last_checked`.
    - **Cek Semua Router**: Edge Function `mikrotik-check-all` mengecek semua router tipe MikroTik dan mengupdate status.
-   - **Syarat**: Router harus bisa diakses dari internet (IP publik/DDNS), layanan www atau www-ssl aktif.
+   - **Syarat**: Router harus bisa diakses dari internet (IP publik/DDNS), layanan www atau www-ssl aktif. Jika router hanya terjangkau via **VPN/WireGuard** (tanpa IP publik), Test Connection dan Cek Semua akan gagal dari cloud; RADIUS auth & accounting tetap bisa dipakai — lihat [MIKROTIK-VPN-WIREGUARD.md](./MIKROTIK-VPN-WIREGUARD.md).
 
 2. **Data pelanggan & paket**
    - `radius_users`, `services`, `user_groups` disimpan di Supabase. Siap dipakai oleh RADIUS server untuk autentikasi jika server tersebut baca dari DB kita.

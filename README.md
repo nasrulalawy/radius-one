@@ -7,7 +7,7 @@ Web app mirip **MixRadius Manager** (RADIUS admin): login, dashboard, manajemen 
 - **Login** – Autentikasi admin via Supabase Auth
 - **Dashboard** – Ringkasan: total user, NAS, layanan, sesi online
 - **Users** – CRUD user RADIUS (username, layanan, status, expiry, data used)
-- **NAS Devices** – CRUD perangkat NAS (Mikrotik, Cisco, Chillispot, pfSense, dll.)
+- **NAS Devices** – CRUD perangkat NAS (Mikrotik, Cisco, Chillispot, pfSense, dll.). MikroTik tanpa IP publik? Bisa pakai [VPN/WireGuard](docs/MIKROTIK-VPN-WIREGUARD.md).
 - **Services** – CRUD paket layanan (prepaid/postpaid, data limit, kecepatan, harga, validity)
 - **Online Users** – Daftar sesi aktif (refresh otomatis)
 - **Reports** – Total pembayaran dan riwayat pembayaran

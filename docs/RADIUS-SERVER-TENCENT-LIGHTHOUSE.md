@@ -56,7 +56,8 @@ Di **RadiusOne** → **Router [NAS]**:
 
 - **Router Address**: masukkan **IP yang dipakai MikroTik untuk kirim RADIUS** ke server.  
   Jika MikroTik dan server di internet, isi **IP publik** MikroTik (atau IP yang keluar saat akses internet).  
-  Jika sama jaringan, isi IP LAN MikroTik (mis. 192.168.1.1).
+  Jika sama jaringan, isi IP LAN MikroTik (mis. 192.168.1.1).  
+  Jika pakai **VPN/WireGuard**, isi IP MikroTik di dalam jaringan VPN (lihat [MIKROTIK-VPN-WIREGUARD.md](./MIKROTIK-VPN-WIREGUARD.md)).
 - **Radius Secret**: sama dengan yang Anda set di MikroTik untuk RADIUS client (shared secret).
 
 ## 5. Jalankan RADIUS server
@@ -88,3 +89,4 @@ Setelah itu, login Hotspot/PPPoE akan di-auth ke Supabase (tabel `radius_users`)
 
 - **User ditolak**: cek username/password di RadiusOne, status user (active/disabled/expired), dan **Router Address** (NAS) harus cocok dengan IP sumber yang dipakai MikroTik.
 - **Tidak ada accounting**: pastikan port 1813 UDP terbuka dan RADIUS server jalan (lihat log pm2: `pm2 logs radius-server`).
+- **Router tanpa IP publik / pakai VPN atau WireGuard**: lihat [MIKROTIK-VPN-WIREGUARD.md](./MIKROTIK-VPN-WIREGUARD.md).
