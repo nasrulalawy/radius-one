@@ -30,7 +30,7 @@ export default defineConfig(({ mode }) => {
           '/api/mikrotik-test': {
             target: supabaseUrl,
             changeOrigin: true,
-            rewrite: (path) => '/functions/v1/mikrotik-test',
+            rewrite: () => '/functions/v1/mikrotik-test',
             configure: (proxy) => {
               proxy.on('proxyReq', (proxyReq) => {
                 if (supabaseKey) proxyReq.setHeader('Authorization', `Bearer ${supabaseKey}`)
