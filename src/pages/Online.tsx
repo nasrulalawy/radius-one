@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { invokeMikrotikFunction } from '../lib/mikrotik-api'
 import type { Session } from '../lib/supabase'
 
 export default function Online() {
@@ -31,7 +32,7 @@ export default function Online() {
 
   const disconnect = async (id: string) => {
     if (!confirm('Putuskan sesi ini di MikroTik?')) return
-    const { data, error } = await supabase.functions.invoke('mikrotik-disconnect', { body: { session_id: id } })
+    const { data, error } = await invokeMikrotikFunction('mikrotik-disconnect', { session_id: id })
     if (error) {
       const { error: delErr } = await supabase.from('sessions').delete().eq('id', id)
       if (delErr) alert('Gagal: ' + error.message)

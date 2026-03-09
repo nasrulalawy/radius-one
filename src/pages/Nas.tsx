@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
+import { invokeMikrotikFunction } from '../lib/mikrotik-api'
 import type { NasDevice } from '../lib/supabase'
 import { Plus, Pencil, Trash2, ExternalLink, BarChart3 } from 'lucide-react'
 
@@ -206,7 +207,7 @@ export default function Nas() {
         setTestLoading(false)
         return
       }
-      const { data, error } = await supabase.functions.invoke('mikrotik-test', { body })
+      const { data, error } = await invokeMikrotikFunction('mikrotik-test', body)
       if (error) {
         setTestMessage('Error: ' + error.message)
       } else if (data?.ok) {
@@ -260,7 +261,7 @@ export default function Nas() {
   const checkAllRouters = async () => {
     setCheckAllLoading(true)
     try {
-      const { data, error } = await supabase.functions.invoke('mikrotik-check-all', {})
+      const { data, error } = await invokeMikrotikFunction('mikrotik-check-all')
       if (error) alert('Error: ' + error.message)
       else if (data?.ok) {
         alert(`Selesai. ${data.checked} router dicek.`)
