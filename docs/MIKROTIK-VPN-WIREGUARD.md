@@ -48,6 +48,45 @@ Konfigurasi:
 
 Setelah itu, login hotspot/PPPoE dan accounting akan mengalir lewat VPN.
 
+**Catatan:** WireGuard di MikroTik tersedia di **RouterOS 7.1+**. Jika device Anda RouterOS 6 atau tidak ada menu WireGuard, gunakan VPN alternatif di bawah.
+
+---
+
+## 2b. VPN alternatif (tanpa WireGuard di MikroTik)
+
+Jika MikroTik **tidak punya WireGuard** (RouterOS 6 atau device lama), Anda bisa pakai **L2TP/IPsec** atau **OpenVPN** agar router dan RADIUS server satu jaringan VPN.
+
+### Opsi 1: L2TP/IPsec (biasa ada di RouterOS 6 & 7)
+
+**Di server (Ubuntu/VPS):** pasang L2TP/IPsec server (mis. dengan `xl2tpd` + `strongswan`).  
+**Di MikroTik:** buat L2TP client yang connect ke server, dapat IP VPN (mis. `10.99.0.2`).  
+RADIUS server jalan di VPS yang sama (atau punya IP di subnet VPN). Di MikroTik set RADIUS client ke IP server di VPN; di RadiusOne isi Router Address = IP MikroTik di VPN.
+
+**Panduan langkah demi langkah:** [VPN-MIKROTIK-L2TP.md](./VPN-MIKROTIK-L2TP.md) (server StrongSwan + xl2tpd, client MikroTik, firewall, troubleshooting).
+
+Contoh singkat di MikroTik (L2TP client):
+
+```bash
+/interface l2tp-client add name=l2tp1 user=USER password=PASS connect-to=IP_PUBLIK_SERVER disabled=no
+/ip address add address=10.99.0.2/24 interface=l2tp1
+```
+
+(IP 10.99.0.2 harus sesuai dengan pool yang diberikan server L2TP.)
+
+### Opsi 2: OpenVPN (client di MikroTik)
+
+**Di server:** pasang OpenVPN, buat config client untuk MikroTik.  
+**Di MikroTik:** Package **openvpn-client** (cek di RouterOS 6/7 apakah tersedia untuk device Anda). Import config, connect; dapat IP VPN.  
+Lalu set RADIUS client ke IP RADIUS server di VPN; di RadiusOne isi Router Address = IP MikroTik di VPN.
+
+### Opsi 3: WireGuard di perangkat lain (bukan di MikroTik)
+
+- Pasang **WireGuard** di PC atau Raspberry Pi di **LAN yang sama** dengan MikroTik.
+- Device itu connect ke VPN server (VPS). RADIUS server jalan di VPS.
+- MikroTik **tidak perlu** VPN: set RADIUS client ke **IP publik VPS**. Atau, jika Anda routing khusus: RADIUS server bisa punya IP di subnet VPN dan lalu lintas dari Pi/LAN ke VPS lewat WireGuard — topologi bisa disesuaikan.
+
+Untuk RADIUS saja, **tanpa VPN pun bisa**: MikroTik (di belakang NAT) kirim auth/accounting ke IP publik RADIUS server. VPN hanya perlu kalau Anda ingin server dan router “satu jaringan” (mis. untuk akses REST API dari server ke MikroTik).
+
 ---
 
 ## 3. Fitur dari dashboard (Test Connection, Cek Semua Router, Putus user)

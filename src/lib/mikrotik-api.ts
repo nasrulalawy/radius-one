@@ -11,15 +11,23 @@ export type MikrotikApiResponse = {
   last_checked?: string
 }
 
+// Nama function di Supabase (bisa beda dari nama logika)
+const FUNCTION_NAMES: Record<MikrotikFunction, string> = {
+  'mikrotik-test': 'rapid-handler',
+  'mikrotik-check-all': 'smart-function',
+  'mikrotik-disconnect': 'mikrotik-disconnect',
+}
+
 /**
  * Panggil langsung ke Supabase Edge Function.
- * CORS diatasi dengan verify_jwt = false di supabase/config.toml agar preflight OPTIONS tidak diblokir.
+ * mikrotik-test → rapid-handler; lainnya sesuai nama.
  */
 export async function invokeMikrotikFunction(
   name: MikrotikFunction,
   body?: Record<string, unknown>
 ): Promise<{ data: MikrotikApiResponse | null; error: { message: string } | null }> {
-  const { data, error } = await supabase.functions.invoke(name, { body: body ?? {} })
+  const functionName = FUNCTION_NAMES[name]
+  const { data, error } = await supabase.functions.invoke(functionName, { body: body ?? {} })
   return {
     data: (data ?? null) as MikrotikApiResponse | null,
     error: error ? { message: error.message } : null,

@@ -214,7 +214,13 @@ export default function Nas() {
         setTestMessage('✓ ' + (data.message || 'Router terkoneksi.'))
         if (editing) load()
       } else {
-        setTestMessage('✗ ' + (data?.message || 'Koneksi gagal.'))
+        const msg = data?.message || 'Koneksi gagal.'
+        const isNoPublicIp = /tidak dapat terhubung|pastikan.*www|ip.*dapat diakses/i.test(msg)
+        setTestMessage(
+          isNoPublicIp
+            ? '✗ ' + msg + ' — Jika router tidak punya IP publik (hanya LAN/NAT), ini normal. Login RADIUS & accounting tetap jalan.'
+            : '✗ ' + msg
+        )
         if (editing) load()
       }
     } catch (e) {
@@ -297,7 +303,7 @@ export default function Nas() {
             </li>
           ) : null}
           <li><strong>Export konfigurasi profil ke router</strong> (sync ke MikroTik): saat ini tidak tersedia; validasi paket dilakukan via RADIUS server.</li>
-          <li>Router tanpa IP publik atau hanya lewat <strong>VPN/WireGuard</strong>: isi Router Address dengan IP MikroTik di jaringan VPN; RADIUS tetap jalan. Test Connection dari dashboard mungkin gagal (cloud tidak punya akses VPN). Lihat <code>docs/MIKROTIK-VPN-WIREGUARD.md</code>.</li>
+          <li><strong>Router tanpa IP publik</strong> (hanya LAN / di belakang NAT): Test Connection & Cek Semua akan gagal — itu normal. <strong>Login RADIUS dan accounting tetap berfungsi</strong> (MikroTik yang kirim ke server). Isi Router Address dengan IP yang dipakai MikroTik untuk kirim RADIUS (LAN atau IP di VPN).</li>
         </ul>
       </div>
       <div className="card" style={{ marginBottom: '1rem', padding: '0.75rem 1rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center' }}>

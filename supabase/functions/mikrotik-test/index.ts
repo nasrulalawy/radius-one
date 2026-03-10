@@ -2,10 +2,11 @@
 // RouterOS 7.x: enable www or www-ssl service, then GET /rest/system/resource with Basic Auth
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const corsHeaders = {
+// CORS: harus persis seperti SDK agar preflight dari browser lolos (https://supabase.com/docs/guides/functions/cors)
+const corsHeaders: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
   'Access-Control-Max-Age': '86400',
 }
 
@@ -66,8 +67,12 @@ async function testMikrotikREST(
 }
 
 Deno.serve(async (req) => {
+  // Preflight: return immediately dengan 200 + CORS (wajib paling atas)
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { status: 200, headers: corsHeaders })
+    return new Response('ok', {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Length': '2' },
+    })
   }
 
   try {

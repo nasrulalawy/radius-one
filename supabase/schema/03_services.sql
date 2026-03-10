@@ -6,6 +6,7 @@ create table public.services (
   name text not null,
   description text,
   billing_type text not null check (billing_type in ('prepaid', 'postpaid')),
+  router_id uuid references public.nas_devices(id) on delete set null,
   data_limit_mb bigint,
   speed_limit_down_kbps int,
   speed_limit_up_kbps int,

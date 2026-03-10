@@ -21,6 +21,7 @@ export type Service = {
   name: string
   description: string | null
   billing_type: 'prepaid' | 'postpaid'
+  router_id: string | null
   data_limit_mb: number | null
   speed_limit_down_kbps: number | null
   speed_limit_up_kbps: number | null

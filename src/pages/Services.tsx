@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Service } from '../lib/supabase'
+import type { Service, NasDevice } from '../lib/supabase'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 
 export default function Services() {
   const [list, setList] = useState<Service[]>([])
+  const [routers, setRouters] = useState<NasDevice[]>([])
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState<'add' | 'edit' | null>(null)
   const [editing, setEditing] = useState<Service | null>(null)
@@ -12,6 +13,7 @@ export default function Services() {
     name: '',
     description: '',
     billing_type: 'prepaid' as 'prepaid' | 'postpaid',
+    router_id: '',
     data_limit_mb: '',
     speed_limit_down_kbps: '',
     speed_limit_up_kbps: '',
@@ -22,12 +24,16 @@ export default function Services() {
 
   const load = async () => {
     setLoading(true)
-    const { data, error } = await supabase.from('services').select('*').order('created_at', { ascending: false })
-    if (error) {
-      alert('Gagal load data: ' + error.message)
+    const [svcRes, nasRes] = await Promise.all([
+      supabase.from('services').select('*').order('created_at', { ascending: false }),
+      supabase.from('nas_devices').select('*').eq('is_active', true).order('nasname'),
+    ])
+    if (svcRes.error) {
+      alert('Gagal load data: ' + svcRes.error.message)
     } else {
-      setList((data as Service[]) ?? [])
+      setList((svcRes.data as Service[]) ?? [])
     }
+    if (nasRes.data) setRouters((nasRes.data as NasDevice[]) ?? [])
     setLoading(false)
   }
 
@@ -41,6 +47,7 @@ export default function Services() {
       name: '',
       description: '',
       billing_type: 'prepaid',
+      router_id: '',
       data_limit_mb: '',
       speed_limit_down_kbps: '',
       speed_limit_up_kbps: '',
@@ -57,6 +64,7 @@ export default function Services() {
       name: row.name,
       description: row.description ?? '',
       billing_type: row.billing_type,
+      router_id: row.router_id ?? '',
       data_limit_mb: row.data_limit_mb?.toString() ?? '',
       speed_limit_down_kbps: row.speed_limit_down_kbps?.toString() ?? '',
       speed_limit_up_kbps: row.speed_limit_up_kbps?.toString() ?? '',
@@ -76,6 +84,7 @@ export default function Services() {
       name: form.name.trim(),
       description: form.description?.trim() || null,
       billing_type: form.billing_type,
+      router_id: form.router_id || null,
       data_limit_mb: form.data_limit_mb ? parseInt(form.data_limit_mb, 10) : null,
       speed_limit_down_kbps: form.speed_limit_down_kbps ? parseInt(form.speed_limit_down_kbps, 10) : null,
       speed_limit_up_kbps: form.speed_limit_up_kbps ? parseInt(form.speed_limit_up_kbps, 10) : null,
@@ -133,6 +142,7 @@ export default function Services() {
             <thead>
               <tr>
                 <th>Nama profil</th>
+                <th>Router</th>
                 <th>Tipe billing</th>
                 <th>Batas data</th>
                 <th>Kecepatan</th>
@@ -146,6 +156,7 @@ export default function Services() {
               {list.map((row) => (
                 <tr key={row.id}>
                   <td>{row.name}</td>
+                  <td>{routers.find((r) => r.id === row.router_id)?.shortname || routers.find((r) => r.id === row.router_id)?.nasname || '-'}</td>
                   <td><span className="badge badge-muted">{row.billing_type === 'prepaid' ? 'Prepaid' : 'Postpaid'}</span></td>
                   <td>{row.data_limit_mb != null ? `${row.data_limit_mb} MB` : 'Unlimited'}</td>
                   <td>{row.speed_limit_down_kbps != null ? `${row.speed_limit_down_kbps} kbps` : '-'}</td>
@@ -184,6 +195,15 @@ export default function Services() {
               <select value={form.billing_type} onChange={(e) => setForm((f) => ({ ...f, billing_type: e.target.value as 'prepaid' | 'postpaid' }))}>
                 <option value="prepaid">Prepaid</option>
                 <option value="postpaid">Postpaid</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Router (MikroTik/NAS)</label>
+              <select value={form.router_id} onChange={(e) => setForm((f) => ({ ...f, router_id: e.target.value }))}>
+                <option value="">-- Pilih router --</option>
+                {routers.map((r) => (
+                  <option key={r.id} value={r.id}>{r.shortname || r.nasname} ({r.nasname})</option>
+                ))}
               </select>
             </div>
             <div className="form-group">
