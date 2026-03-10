@@ -27,34 +27,14 @@ export default defineConfig(({ mode }) => {
   server: {
     proxy: supabaseUrl
       ? {
-          '/api/mikrotik-test': {
+          '/api/mikrotik-proxy': {
             target: supabaseUrl,
             changeOrigin: true,
-            rewrite: () => '/functions/v1/mikrotik-test',
             configure: (proxy) => {
-              proxy.on('proxyReq', (proxyReq) => {
-                if (supabaseKey) proxyReq.setHeader('Authorization', `Bearer ${supabaseKey}`)
-                proxyReq.setHeader('Content-Type', 'application/json')
-              })
-            },
-          },
-          '/api/mikrotik-check-all': {
-            target: supabaseUrl,
-            changeOrigin: true,
-            rewrite: () => '/functions/v1/mikrotik-check-all',
-            configure: (proxy) => {
-              proxy.on('proxyReq', (proxyReq) => {
-                if (supabaseKey) proxyReq.setHeader('Authorization', `Bearer ${supabaseKey}`)
-                proxyReq.setHeader('Content-Type', 'application/json')
-              })
-            },
-          },
-          '/api/mikrotik-disconnect': {
-            target: supabaseUrl,
-            changeOrigin: true,
-            rewrite: () => '/functions/v1/mikrotik-disconnect',
-            configure: (proxy) => {
-              proxy.on('proxyReq', (proxyReq) => {
+              proxy.on('proxyReq', (proxyReq, req: { url?: string }) => {
+                const u = req?.url ? new URL(req.url, 'http://localhost') : null
+                const fn = u?.searchParams.get('fn') || 'mikrotik-test'
+                ;(proxyReq as { path?: string }).path = `/functions/v1/${fn}`
                 if (supabaseKey) proxyReq.setHeader('Authorization', `Bearer ${supabaseKey}`)
                 proxyReq.setHeader('Content-Type', 'application/json')
               })

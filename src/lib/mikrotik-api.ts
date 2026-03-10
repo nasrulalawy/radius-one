@@ -10,15 +10,13 @@ export type MikrotikApiResponse = {
 }
 
 /**
- * Selalu lewat same-origin /api agar tidak kena CORS (tidak pernah panggil Supabase langsung dari browser).
+ * Same-origin /api/mikrotik-proxy → di production ditangani Edge Middleware (no CORS).
  */
 export async function invokeMikrotikFunction(
   name: MikrotikFunction,
   body?: Record<string, unknown>
 ): Promise<{ data: MikrotikApiResponse | null; error: { message: string } | null }> {
-  const url = import.meta.env.DEV
-    ? `/api/${name}`
-    : `/api/mikrotik-proxy?fn=${encodeURIComponent(name)}`
+  const url = `/api/mikrotik-proxy?fn=${encodeURIComponent(name)}`
   try {
     const res = await fetch(url, {
       method: 'POST',
