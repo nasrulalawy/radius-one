@@ -17,12 +17,14 @@
 1. Pasang Supabase CLI: https://supabase.com/docs/guides/cli
 2. Login: `supabase login`
 3. Link project: `supabase link --project-ref <your-project-ref>`
-4. Deploy fungsi:
+4. Deploy fungsi (baca `supabase/config.toml` untuk `verify_jwt = false` agar CORS dari browser jalan):
    ```bash
    supabase functions deploy mikrotik-test
    supabase functions deploy mikrotik-check-all
    supabase functions deploy mikrotik-disconnect
    ```
+
+**CORS:** Di `supabase/config.toml` ketiga function di-set `verify_jwt = false` agar preflight OPTIONS dari browser tidak diblokir gateway. Setelah mengubah `config.toml`, wajib **redeploy** ketiga function di atas.
 
 ## Migrasi database
 

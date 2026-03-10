@@ -1,0 +1,13 @@
+# Supabase project config (used by CLI: supabase functions deploy, etc.)
+# https://supabase.com/docs/guides/functions/function-configuration
+
+# Nonaktifkan verifikasi JWT agar preflight OPTIONS dari browser tidak diblokir gateway (CORS).
+# Function tetap aman: validasi bisa di dalam function; anon key dari client tetap dikirim.
+[functions.mikrotik-test]
+verify_jwt = false
+
+[functions.mikrotik-check-all]
+verify_jwt = false
+
+[functions.mikrotik-disconnect]
+verify_jwt = false
